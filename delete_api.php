@@ -28,7 +28,7 @@ if (!$stmt->fetch()) {
 $stmt->close();
 
 // ยิงไป Node.js
-$serverURL = "{$ipServer}/delete-query/" . urlencode($queryName);
+$serverURL = "{$delete}/delete-query/" . urlencode($queryName);
 $ch = curl_init($serverURL);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -61,3 +61,4 @@ echo json_encode([
     'success' => true,
     'node_response' => $nodeData
 ]);
+
