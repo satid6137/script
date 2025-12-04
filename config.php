@@ -1,11 +1,6 @@
 <?php
 // สำหรับ /script
-session_set_cookie_params([
-    'path' => '/script',
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
+session_set_cookie_params(0, '/script', '', false, true);
 
 session_name("script");
 
@@ -25,6 +20,7 @@ $hosCode  = 'xxxxxx';
 $apiKey   = 'qqq@qqq'; // 💡 ใส่ API key ไว้ตรงนี้ได้เลย
 $summaryKey = 'aaa@aaa'; // 🔐 key สำหรับ summary เท่านั้น
 $nodejs = 'http://eee:3000';
+$delete = 'http://eee:3000';
 
 // เชื่อมต่อฐานข้อมูล
 $conn = new mysqli($host, $user, $pass, $db);
