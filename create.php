@@ -5,37 +5,43 @@ if (!isset($_SESSION['user_id'])) die("กรุณาเข้าสู่ร�
 $cronOptions = $conn->query("SELECT id, label, cron_expr FROM cron_profiles ORDER BY id");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $his = $_POST['his_type'];
-  $name = $_POST['query_name'];
-  $text = $_POST['query_text'];
+    $his  = $_POST['his_type'];
+    $name = $_POST['query_name'];
+    $text = $_POST['query_text'];
 
-  if ($his && $name && $text) {
-	  if (!preg_match('/^[a-zA-Z0-9_]+$/', $name)) {
-  $error = "ชื่อ Query ใช้ได้เฉพาะ A–Z, a–z, 0–9 และ _ เท่านั้น (ห้ามมีช่องว่างหรืออักขระพิเศษ)";
-}
-	  
-    // ตรวจสอบ query_name ซ้ำ
-    $checkStmt = $conn->prepare("SELECT COUNT(*) FROM save_query WHERE query_name = ?");
-    $checkStmt->bind_param('s', $name);
-    $checkStmt->execute();
-    $checkStmt->bind_result($count);
-    $checkStmt->fetch();
-    $checkStmt->close();
+    if ($his && $name && $text) {
 
-    if ($count > 0) {
-      $error = "มีชื่อ Query นี้อยู่แล้ว กรุณาตั้งชื่อใหม่";
+        // ❌ บังคับให้ใช้เฉพาะ A-Z, a-z, 0-9, _
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $name)) {
+            $error = "ชื่อ Query ใช้ได้เฉพาะ A–Z, a–z, 0–9 และ _ เท่านั้น (ห้ามมีช่องว่างหรืออักขระพิเศษ)";
+        } else {
+
+            // ตรวจสอบชื่อซ้ำ
+            $checkStmt = $conn->prepare("SELECT COUNT(*) FROM save_query WHERE query_name = ?");
+            $checkStmt->bind_param('s', $name);
+            $checkStmt->execute();
+            $checkStmt->bind_result($count);
+            $checkStmt->fetch();
+            $checkStmt->close();
+
+            if ($count > 0) {
+                $error = "มีชื่อ Query นี้อยู่แล้ว กรุณาตั้งชื่อใหม่";
+            } else {
+                $createdBy = $_SESSION['user_id'];
+                $cronId = $_POST['cron_id'] ?: null;
+
+                $stmt = $conn->prepare("INSERT INTO save_query (his_type, query_name, query_text, created_by, cron_id, hos_code) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param('sssiss', $his, $name, $text, $createdBy, $cronId, $hosCode);
+                $stmt->execute();
+
+                echo "<script>alert('เพิ่มข้อมูลสำเร็จ'); window.location='index.php';</script>";
+                exit;
+            }
+        }
+
     } else {
-      $createdBy = $_SESSION['user_id'];
-	  $cronId = $_POST['cron_id'] ?: null;
-      $stmt = $conn->prepare("INSERT INTO save_query (his_type, query_name, query_text, created_by, cron_id, hos_code) VALUES (?, ?, ?, ?, ?, ?)");
-      $stmt->bind_param('sssiss', $his, $name, $text, $createdBy, $cronId, $hosCode);
-      $stmt->execute();
-      echo "<script>alert('เพิ่มข้อมูลสำเร็จ'); window.location='index.php';</script>";
-      exit;
+        $error = "กรุณากรอกข้อมูลให้ครบทุกช่อง";
     }
-  } else {
-    $error = "กรุณากรอกข้อมูลให้ครบทุกช่อง";
-  }
 }
 ?>
 
@@ -95,4 +101,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </form>
 </div>
 </body>
+
 </html>
