@@ -1,2 +1,0 @@
-RewriteEngine On
-RewriteRule ^([^/]+)/([^/]+)$ query.php?hisType=$1&queryName=$2 [QSA,L]
