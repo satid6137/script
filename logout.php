@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require __DIR__ . '/config.php';
 require_once 'log_helper.php';
 #session_start();
 

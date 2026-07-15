@@ -1,15 +1,15 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-require 'config.php';
+require __DIR__ . '/config.php';
 require_once 'log_helper.php';
-#session_start();
+session_start();
 
 // ✅ รับข้อมูล JSON จาก client
 $data = json_decode(file_get_contents("php://input"), true);
 $queryName = $data['query_name'] ?? null;
-$url       = $data['url'] ?? '';
-$userId    = $_SESSION['user_id'] ?? null;
+$url = $data['url'] ?? '';
+$userId = $_SESSION['user_id'] ?? null;
 
 if ($queryName) {
 

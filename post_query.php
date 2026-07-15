@@ -6,8 +6,10 @@ if (!isset($_POST['url'])) {
 }
 
 $url = $_POST['url'];
-$apiKey = $_POST['apiKey'] ?? null;   // รับจาก index.php
-$hisType = $_POST['hisType'] ?? null;   // รับจาก index.php
+$apiKey = $_POST['apiKey'] ?? null;
+$hisType = $_POST['hisType'] ?? null;
+$queryName = $_POST['queryName'] ?? null;
+$hosCode = $_POST['hosCode'] ?? null;
 
 // เตรียม Header ส่งไป Node.js
 $headers = [];
@@ -20,11 +22,19 @@ if ($hisType) {
   $headers[] = "X-HIS-Type: {$hisType}";
 }
 
+if ($queryName) {
+  $headers[] = "X-Query-Name: {$queryName}";
+}
+
+if ($hosCode) {
+  $headers[] = "X-Hos-Code: {$hosCode}";
+}
+
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 
-// ถ้ามี header ให้ส่งไปด้วย
+// ส่ง header ไป NodeJS
 if (!empty($headers)) {
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 }

@@ -1,10 +1,12 @@
 <?php
-require 'config.php';
+require __DIR__ . '/config.php';
 require_once 'log_helper.php'; // ถ้ามีระบบ log
 if (session_status() === PHP_SESSION_NONE)
   session_start();
-if (!isset($_SESSION['user_id']))
-  die("กรุณาเข้าสู่ระบบ");
+if (!isset($_SESSION['user_id'])) {
+  header("Location: login.php?timeout=1");
+  exit;
+}
 
 function isValidUsername($username)
 {
@@ -58,41 +60,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
   <meta charset="UTF-8">
-  <title>สมัครสมาชิก</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>สร้าง Username | <?= $hospital ?></title>
+  <link rel="icon" href="/script/assets/icons/health48.png" type="image/png">
+  <link rel="apple-touch-icon" href="/script/assets/icons/health48.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/script/assets/css/theme.css" rel="stylesheet">
 </head>
 
-<body class="bg-light">
-  <div class="container mt-5" style="max-width:500px">
-    <h3 class="mb-3">📝 สมัครสมาชิก</h3>
+<body>
+  <header class="hos-topbar">
+    <div class="container">
+      <a href="index.php" class="hos-brand">
+        <img src="/script/assets/icons/health48.png" alt="โลโก้โรงพยาบาลห้างฉัตร">
+        <span>
+          <?= $hospital ?><small>ระบบจัดการ Query API</small>
+        </span>
+      </a>
+    </div>
+  </header>
 
-    <?php if (!empty($error)): ?>
-      <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
+  <div class="container" style="max-width:520px">
+    <div class="hos-page-header">
+      <h1 class="hos-page-title">สร้าง Username</h1>
+      <p class="hos-page-subtitle mb-0">เพิ่มผู้ใช้ใหม่เข้าสู่ระบบ</p>
+    </div>
 
-    <form method="POST">
-      <div class="mb-3">
-        <label>ชื่อผู้ใช้ (ภาษาอังกฤษ ตัวเลข _ หรือ . มากกว่า 4 ตัว)</label>
-        <input name="username" class="form-control" required pattern="[a-zA-Z0-9_.]{5,}"
-          title="ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษ ตัวเลข _ หรือ . อย่างน้อย 5 ตัวอักษร">
-      </div>
-      <div class="mb-3">
-        <label>รหัสผ่าน (อย่างน้อย 9 ตัว a-z, A-Z, 0-9, @#$%^&*())</label>
-        <input type="password" name="password" class="form-control" id="password" required
-          pattern="[a-zA-Z0-9@#$%^&*!]{9,}">
-      </div>
-      <div class="mb-3">
-        <label>ยืนยันรหัสผ่าน</label>
-        <input type="password" name="confirm" class="form-control" id="confirm" required>
-      </div>
-      <div class="form-check mb-3">
-        <input type="checkbox" class="form-check-input" id="togglePassword">
-        <label class="form-check-label" id="toggleLabel" for="togglePassword">แสดงรหัสผ่าน</label>
-      </div>
-      <button type="submit" class="btn btn-success">สมัครสมาชิก</button>
-      <a href="<?= isset($_GET['from']) && $_GET['from'] === 'admin' ? 'admin.php' : 'login.php' ?>"
-        class="btn btn-secondary">ย้อนกลับ</a>
-    </form>
+    <div class="hos-card">
+      <?php if (!empty($error)): ?>
+        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
+
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label">ชื่อผู้ใช้ (ภาษาอังกฤษ ตัวเลข _ หรือ . มากกว่า 4 ตัว)</label>
+          <input name="username" class="form-control" required pattern="[a-zA-Z0-9_.]{5,}"
+            title="ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษ ตัวเลข _ หรือ . อย่างน้อย 5 ตัวอักษร">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">รหัสผ่าน (อย่างน้อย 9 ตัว a-z, A-Z, 0-9, @#$%^&*())</label>
+          <input type="password" name="password" class="form-control" id="password" required
+            pattern="[a-zA-Z0-9@#$%^&*!]{9,}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">ยืนยันรหัสผ่าน</label>
+          <input type="password" name="confirm" class="form-control" id="confirm" required>
+        </div>
+        <div class="form-check mb-3">
+          <input type="checkbox" class="form-check-input" id="togglePassword">
+          <label class="form-check-label" id="toggleLabel" for="togglePassword">แสดงรหัสผ่าน</label>
+        </div>
+        <button type="submit" class="btn btn-success">สมัครสมาชิก</button>
+        <a href="<?= isset($_GET['from']) && $_GET['from'] === 'admin' ? 'admin.php' : 'login.php' ?>"
+          class="btn btn-outline-secondary">ย้อนกลับ</a>
+      </form>
+    </div>
   </div>
 
   <script>

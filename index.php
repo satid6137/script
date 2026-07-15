@@ -1,8 +1,7 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-#session_start();
-require 'config.php';
+require __DIR__ . '/config.php';
 require_once 'log_helper.php';
 
 $username = null;
@@ -19,14 +18,43 @@ if (isset($_SESSION['user_id'])) {
 
 // ✅ ดึงรายการ Query
 $result = $conn->query("
-  SELECT sq.id, sq.query_name, sq.his_type, sq.query_text, sq.last_post_at,
-         u.username AS created_by_name,
-         cp.label AS cron_label
+  SELECT 
+      sq.id,
+      sq.query_name,
+      sq.his_type,
+      sq.query_text,
+      sq.last_post_at,
+      u.username AS created_by_name,
+      cp.label AS cron_label,
+
+      ns.notify_type,
+      ns.line_token,
+      ns.moph_client_key,
+      ns.moph_secret_key,
+      ns.description,
+
+      cp2.label AS notify_label,
+      cp2.cron_expr AS notify_cron_expr
+
   FROM save_query sq
-  LEFT JOIN user u ON sq.created_by = u.id
-  LEFT JOIN cron_profiles cp ON sq.cron_id = cp.id
+  LEFT JOIN user u 
+      ON sq.created_by = u.id
+  LEFT JOIN cron_profiles cp 
+      ON sq.cron_id = cp.id
+
+  LEFT JOIN notify_settings ns 
+      ON ns.query_name COLLATE utf8mb4_unicode_ci 
+         = sq.query_name COLLATE utf8mb4_unicode_ci
+      AND ns.hos_code COLLATE utf8mb4_unicode_ci
+         = sq.hos_code COLLATE utf8mb4_unicode_ci
+
+  LEFT JOIN cron_profiles cp2 
+      ON cp2.id = ns.cron_id
+
   ORDER BY sq.id DESC
 ");
+
+
 $totalRows = $result->num_rows;
 ?>
 <!DOCTYPE html>
@@ -34,8 +62,15 @@ $totalRows = $result->num_rows;
 
 <head>
   <meta charset="UTF-8">
-  <title>Query Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Query Dashboard | <?= $hospital ?></title>
+  <link rel="icon" href="/script/assets/icons/health48.png" type="image/png">
+  <link rel="apple-touch-icon" href="/script/assets/icons/health48.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/script/assets/css/theme.css" rel="stylesheet">
   <style>
     .row-hidden {
       display: none !important;
@@ -46,52 +81,84 @@ $totalRows = $result->num_rows;
       word-break: break-word;
     }
   </style>
+  <style>
+    .query-name-wrap {
+      white-space: normal !important;
+      word-break: break-word;
+      max-width: 300px;
+      /* ปรับได้ */
+    }
+  </style>
+  <style>
+    .action-buttons {
+      white-space: nowrap;
+    }
+
+    .action-buttons a {
+      display: inline-block;
+      margin-right: 4px;
+    }
+  </style>
+
 </head>
 
-<body class="bg-light">
-  <div class="container mt-4">
+<body>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2>📋 รายการ Query</h2>
-      <div class="d-flex align-items-center">
+  <header class="hos-topbar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <a href="index.php" class="hos-brand">
+        <img src="/script/assets/icons/health48.png" alt="โลโก้โรงพยาบาลห้างฉัตร">
+        <span>
+          <?= $hospital ?><small>ระบบจัดการ Query API</small>
+        </span>
+      </a>
+      <div class="d-flex align-items-center flex-wrap gap-2">
         <?php if (isset($_SESSION['user_id'])): ?>
-          <span class="me-3 text-muted">👤 <?= htmlspecialchars($username) ?> (<?= htmlspecialchars($userRole) ?>)</span>
-          <a href="create.php" class="btn btn-success me-2">➕ เพิ่ม Query</a>
-          <a href="change_password.php" class="btn btn-outline-warning me-2">🔑 เปลี่ยนรหัสผ่าน</a>
+          <span class="hos-user-chip">👤 <?= htmlspecialchars($username) ?> · <?= htmlspecialchars($userRole) ?></span>
+          <a href="create.php" class="btn btn-sm btn-success">➕ เพิ่ม Query</a>
+          <a href="change_password.php" class="btn btn-sm btn-outline-secondary">เปลี่ยนรหัสผ่าน</a>
           <?php if ($userRole === 'admin'): ?>
-            <a href="admin.php" class="btn btn-outline-dark me-2">🛠️ Admin Panel</a>
+            <a href="admin.php" class="btn btn-sm btn-outline-dark">Admin Panel</a>
           <?php endif; ?>
-          <a href="logout.php" class="btn btn-outline-danger">🚪 Logout</a>
+          <a href="logout.php" class="btn btn-sm btn-outline-danger">ออกจากระบบ</a>
         <?php else: ?>
-          <a href="login.php" class="btn btn-outline-primary">🔐 Login</a>
+          <a href="login.php" class="btn btn-sm btn-outline-primary">เข้าสู่ระบบ</a>
         <?php endif; ?>
       </div>
     </div>
+  </header>
 
-    <!-- 🔍 ช่องค้นหา + ล้าง + วันที่ + Export -->
-    <div class="row mb-3">
-      <div class="col-md-6">
+  <div class="container">
+
+    <div class="hos-page-header">
+      <h1 class="hos-page-title">รายการ Query</h1>
+      <p class="hos-page-subtitle mb-0">ตั้งค่า ส่งคำสั่ง และติดตามสถานะ Query ทั้งหมดของโรงพยาบาล</p>
+    </div>
+
+    <!-- ช่องค้นหา + ล้าง + วันที่ + Export -->
+    <div class="hos-toolbar row gy-2">
+      <div class="col-12 col-lg-6">
         <div class="input-group">
-          <input type="text" id="querySearch" class="form-control"
-            placeholder="🔍 ค้นหา HIS, ชื่อ Query หรือผู้สร้าง...">
-          <button class="btn btn-outline-secondary" type="button" id="clearSearch">❌ ล้าง</button>
+          <span class="input-group-text bg-white">🔍</span>
+          <input type="text" id="querySearch" class="form-control" placeholder="ค้นหา HIS, ชื่อ Query หรือผู้สร้าง...">
+          <button class="btn btn-outline-secondary" type="button" id="clearSearch">ล้าง</button>
         </div>
       </div>
-      <div class="col-md-4 d-flex gap-2">
-        <input type="date" id="startDate" class="form-control" placeholder="เริ่ม">
-        <input type="date" id="endDate" class="form-control" placeholder="สิ้นสุด">
+      <div class="col-12 col-lg-4 row g-2">
+        <div class="col-6"><input type="date" id="startDate" class="form-control" placeholder="เริ่ม"></div>
+        <div class="col-6"><input type="date" id="endDate" class="form-control" placeholder="สิ้นสุด"></div>
       </div>
-      <div class="col-md-2 text-end">
+      <div class="col-12 col-lg-2 text-lg-end">
         <button class="btn btn-outline-success w-100" onclick="exportCSV()">📤 Export CSV</button>
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped bg-white align-middle text-nowrap">
+    <div class="table-responsive hos-card p-0">
+      <table class="table table-striped align-middle mb-0">
         <thead class="table-dark">
           <tr>
             <th style="width: 80px;">HIS</th>
-            <th style="width: 120px;">ชื่อ Query</th>
+            <th style="width: 300px;">ชื่อ Query</th>
             <th style="width: 250px;">Query</th>
             <th style="width: 120px;">ผู้สร้าง</th>
             <th style="width: 300px;">POST → client</th>
@@ -122,12 +189,36 @@ $totalRows = $result->num_rows;
             ?>
             <tr data-his="<?= strtolower($hisType) ?>" data-query="<?= strtolower($queryNameRaw) ?>"
               data-user="<?= strtolower($createdBy) ?>">
-              <td><?= $hisType ?></td>
-              <td class="text-truncate"><?= htmlspecialchars($queryNameRaw) ?>
+              <td>
+                <?= $hisType ?>
+              </td>
+              <td class="query-name-wrap">
+                <?= htmlspecialchars($queryNameRaw) ?>
+
                 <?php if (!empty($row['cron_label'])): ?>
-                  <div class="text-muted small"><?= htmlspecialchars($row['cron_label']) ?></div>
+                  <div class="text-muted small">
+
+                    <?= htmlspecialchars($row['cron_label']) ?>
+                  </div>
+                <?php endif; ?>
+
+                <?php if (!empty($row['notify_type']) && $row['notify_type'] !== 'none'): ?>
+                  <div class="text-muted small">
+                    🔔
+                    <?php if ($row['notify_type'] === 'line'): ?>
+                      LINE
+                    <?php elseif ($row['notify_type'] === 'moph'): ?>
+                      MOPH
+                    <?php endif; ?>
+
+                    <?php if (!empty($row['notify_label'])): ?>
+                      (
+                      <?= htmlspecialchars($row['notify_label']) ?>)
+                    <?php endif; ?>
+                  </div>
                 <?php endif; ?>
               </td>
+
               <td>
                 <pre class="text-muted small mb-1"><?= $queryText ?>...</pre>
                 <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#queryModal"
@@ -137,18 +228,23 @@ $totalRows = $result->num_rows;
                   👁️ ดู Query เต็ม
                 </button>
               </td>
-              <td><?= $createdBy ?></td>
+              <td>
+                <?= $createdBy ?>
+              </td>
               <td>
                 <button type="button" class="btn btn-sm btn-primary"
-                  onclick="postToClient('<?= $urlPost ?>', '<?= addslashes($queryNameRaw) ?>', <?= $rowId ?>)">
+                  onclick="postToClient('<?= $urlPost ?>', '<?= addslashes($queryNameRaw) ?>', <?= $rowId ?>, '<?= $row['his_type'] ?>')">
                   🚀 ส่งคำสั่ง
                 </button>
+                <button type="button" class="btn btn-sm btn-success"
+                  onclick="sendNotifyNow('<?= addslashes($queryNameRaw) ?>', '<?= $hosCode ?>', <?= $rowId ?>)">
+                  🔔 ส่งแจ้งเตือน
+                </button>
+
                 <?php if (isset($_SESSION['user_id'])): ?>
                   <!-- กรณี login แล้ว -->
                   <div class="small mt-2">🚀 API URL :<br>
-                    <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                        <?= $urlAPI ?>
-                      </code>
+                    <code class="text-wrap d-inline-block" style="max-width: 350px;"><?= $urlAPI ?></code>
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"
                       onclick="navigator.clipboard.writeText('<?= addslashes($urlAPI) ?>').then(() => { this.textContent='✅'; setTimeout(() => this.innerHTML='📋', 1500) })">
                       📋
@@ -168,8 +264,8 @@ $totalRows = $result->num_rows;
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-          <?= $pingUrl ?>
-        </code>
+                                                                                                                                                                                                                          <?= $pingUrl ?>
+                                                                                                                                                                                                                        </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL" onclick="navigator.clipboard.writeText('<?= addslashes($pingUrl) ?>')
@@ -189,7 +285,8 @@ $totalRows = $result->num_rows;
               </td>
               <td class="text-muted small" id="last-post-<?= $rowId ?>">
                 <?php if ($lastPost): ?>
-                  📅 <?= date('Y-m-d H:i', strtotime($lastPost)) ?><br>
+                  📅
+                  <?= date('Y-m-d H:i', strtotime($lastPost)) ?><br>
                   <span class="text-info small ago" data-dt="<?= $lastPost ?>">⏱ คำนวณ...</span>
                 <?php else: ?>
                   <span class="text-secondary">—</span>
@@ -197,7 +294,7 @@ $totalRows = $result->num_rows;
               </td>
               <td class="text-center fw-bold" id="status-<?= $rowId ?>">⏳</td>
               <?php if (isset($_SESSION['user_id'])): ?>
-                <td class="text-center">
+                <td class="text-center action-buttons">
                   <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">✏️ แก้ไข</a>
                   <a href="javascript:void(0)" onclick="deleteQueryAjax(<?= $row['id'] ?>, this)"
                     class="btn btn-sm btn-danger">🗑️ ลบ</a>
@@ -210,7 +307,7 @@ $totalRows = $result->num_rows;
     </div>
 
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
       <div>
         <label>แสดง:</label>
         <select id="rowsPerPage" class="form-select d-inline-block w-auto">
@@ -229,7 +326,8 @@ $totalRows = $result->num_rows;
 
 
     <p class="text-muted small">
-      🔢 พบทั้งหมด <?= $totalRows ?> รายการ
+      🔢 พบทั้งหมด
+      <?= $totalRows ?> รายการ
       <span class="ms-3">📝 สถานะ: ⏳ = รอดำเนินการ, ✅ = สำเร็จ, ❌ = ล้มเหลว</span>
     </p>
 
@@ -274,14 +372,20 @@ $totalRows = $result->num_rows;
 
     <script>
       // 🚀 POST ไป client พร้อมอัปเดตสถานะ
-      function postToClient(url, queryName, rowId) {
+      function postToClient(url, queryName, rowId, hisType) {
         const statusCell = document.getElementById('status-' + rowId);
         statusCell.textContent = '⏳';
 
         fetch('post_query.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'url=' + encodeURIComponent(url)
+          body: new URLSearchParams({
+            url: url,
+            queryName: queryName,
+            hosCode: hosCode,
+            hisType: hisType,
+            apiKey: apiKey
+          })
         })
           .then(res => res.json())
           .then(data => {
@@ -298,6 +402,29 @@ $totalRows = $result->num_rows;
             showToast(`❌ ไม่สามารถเชื่อมต่อ server ได้: ${err.message}`, 'danger');
           });
       }
+
+      // 🚀 POST ไป notify พร้อมอัปเดตสถานะ
+      function sendNotifyNow(queryName, hosCode, rowId) {
+        if (!confirm(`📨 ต้องการส่งแจ้งเตือนของ "${queryName}" ตอนนี้เลยใช่ไหม`)) return;
+
+        fetch('send_notify_now.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `queryName=${encodeURIComponent(queryName)}&hosCode=${encodeURIComponent(hosCode)}`
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showToast('✅ ส่งแจ้งเตือนสำเร็จ', 'success');
+            } else {
+              showToast(`❌ ส่งแจ้งเตือนไม่สำเร็จ: ${data.error}`, 'danger');
+            }
+          })
+          .catch(err => {
+            showToast('❌ ไม่สามารถเชื่อมต่อ server', 'danger');
+          });
+      }
+
 
       // 🔍 ค้นหา + กรอง
       function filterRows(resetPage = true) {
@@ -561,6 +688,11 @@ $totalRows = $result->num_rows;
       }
     </script>
 
+    <script>
+      const hosCode = "<?= $hosCode ?>";
+      const apiKey = "<?= $apiKey ?>";
+    </script>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -589,9 +721,9 @@ $totalRows = $result->num_rows;
       });
     </script>
 
-    <footer class="text-center text-muted small mt-4 mb-3">
-      ✨ Developed by <strong>นายสาธิต รินคำ นักวิชาการคอมพิวเตอร์ กลุ่มงานสุขภาพดิจิตอล โรงพยาบาลห้างฉัตร</strong>
-      @ 🚀<strong>Coder Copilot</strong> @ 📝เครดิต YuiCity / Vorabodin สสจ.ชม @ 📅<?= date('Y') ?>
+    <footer class="hos-footer text-center">
+      Developed by <strong>นายสาธิต รินคำ</strong> นักวิชาการคอมพิวเตอร์ กลุ่มงานสุขภาพดิจิตอล โรงพยาบาลห้างฉัตร
+      · Coder Copilot · เครดิต YuiCity / Vorabodin สสจ.ชม · <?= date('Y') ?>
     </footer>
 
   </div> <!-- .container -->
