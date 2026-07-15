@@ -1,0 +1,105 @@
+ยังไม่มี Composer
+ให้ติดตั้งด้วยคำสั่งนี้:
+ขั้นตอนที่ 1 — ติดตั้ง Composer บน Windows
+1) ดาวน์โหลด Composer Installer
+ไปที่เว็บทางการ:
+
+👉 https://getcomposer.org/Composer-Setup.exe (getcomposer.org in Bing)
+
+2) ติดตั้งแบบ Next → Next → Next
+ตอนติดตั้งมันจะถามหา PHP ให้เลือก:
+
+Code
+C:\xampp\php\php.exe
+เพราะคุณใช้ XAMPP
+
+3) ทดสอบว่า Composer ใช้งานได้
+เปิด CMD ใหม่ (สำคัญมาก ต้องเปิดใหม่)
+เปิด Command Prompt (CMD) แล้วพิมพ์:
+
+Code
+composer -V
+ถ้าขึ้นเวอร์ชัน เช่น:
+
+Code
+Composer version 2.x.x
+แปลว่าใช้งานได้แล้ว
+
+🟩 ขั้นตอนที่ 2 — เข้าไปที่โฟลเดอร์โปรเจกต์ XAMPP
+สมมติคุณเก็บโปรเจกต์ไว้ที่:
+
+Code
+C:\xampp\htdocs\script
+ให้เปิด CMD แล้วพิมพ์:
+
+Code
+cd C:\xampp\htdocs\script
+ตรวจสอบว่ามีไฟล์ config.php, index.php อยู่ในโฟลเดอร์นี้
+
+🟩 ขั้นตอนที่ 3 — ติดตั้ง phpdotenv
+พิมพ์คำสั่งนี้ใน CMD:
+
+Code
+composer require vlucas/phpdotenv
+หลังจากรันเสร็จ จะมีโฟลเดอร์:
+
+Code
+vendor/
+composer.json
+composer.lock
+และไฟล์สำคัญ:
+
+Code
+vendor/autoload.php
+
+
+
+Windows
+ฟ้อง error zip
+วิธีแก้แบบ 100% ทำตามทีละขั้น
+1) เปิด php.ini ของ XAMPP (ตัวที่ Composer ใช้)
+ไฟล์อยู่ที่:
+
+Code
+C:\xampp\php\php.ini
+เปิดด้วย Notepad หรือ VS Code
+
+2) เปิดใช้งาน zip extension
+ค้นหา:
+
+Code
+;extension=zip
+แล้วแก้เป็น:
+
+Code
+extension=zip
+ถ้าเจอแบบนี้ก็เปิดด้วย:
+
+Code
+extension=php_zip.dll
+3) เช็กว่ามีไฟล์ php_zip.dll อยู่ไหม
+ไปที่:
+
+Code
+C:\xampp\php\ext\
+ต้องมีไฟล์:
+
+Code
+php_zip.dll
+ถ้ามี → ใช้ได้
+
+Linix
+Code
+sudo apt install composer
+หรือถ้าเป็น CentOS/AlmaLinux:
+
+Code
+sudo dnf install composer
+แล้วค่อยรัน:
+
+Code
+cd /opt/lampp/htdocs/script
+composer require vlucas/phpdotenv
+
+table user เพิ่ม คอลัม
+ALTER TABLE user ADD COLUMN active TINYINT(1) DEFAULT 1;
