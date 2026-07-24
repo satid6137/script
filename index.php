@@ -264,8 +264,8 @@ $totalRows = $result->num_rows;
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                          <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                        </code>
+                                                                                                                                                                                                                                                                                  <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL" onclick="navigator.clipboard.writeText('<?= addslashes($pingUrl) ?>')
@@ -296,24 +296,37 @@ $totalRows = $result->num_rows;
               <?php if (isset($_SESSION['user_id'])): ?>
                 <td class="action-buttons">
 
-                  <!-- บรรทัดแรก -->
-                  <div class="mb-1">
-                    <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">
-                      ✏️ แก้ไข
-                    </a>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      ⚙️ จัดการ
+                    </button>
 
-                    <a href="javascript:void(0)" onclick="deleteQueryAjax(<?= $row['id'] ?>, this)"
-                      class="btn btn-sm btn-danger">
-                      🗑️ ลบQuery
-                    </a>
-                  </div>
+                    <ul class="dropdown-menu">
 
-                  <!-- บรรทัดที่สอง -->
-                  <div>
-                    <a href="javascript:void(0)" onclick="deleteTableOnly('<?= $row['query_name'] ?>', this)"
-                      class="btn btn-sm btn-secondary">
-                      🗂️ ลบTable
-                    </a>
+                      <!-- ✏️ แก้ไข -->
+                      <li>
+                        <a class="dropdown-item" href="edit.php?id=<?= $row['id'] ?>">
+                          ✏️ แก้ไข
+                        </a>
+                      </li>
+
+                      <!-- 🔥 ลบ Query -->
+                      <li>
+                        <a class="dropdown-item text-danger" href="javascript:void(0)"
+                          onclick="deleteQueryAjax(<?= $row['id'] ?>, this)">
+                          🔥 ลบ Query
+                        </a>
+                      </li>
+
+                      <!-- 🗑️ ลบ Table -->
+                      <li>
+                        <a class="dropdown-item text-secondary" href="javascript:void(0)"
+                          onclick="deleteTableOnly('<?= $row['query_name'] ?>', this)">
+                          🗑️ ลบ Table
+                        </a>
+                      </li>
+
+                    </ul>
                   </div>
 
                 </td>
