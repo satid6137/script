@@ -264,8 +264,8 @@ $totalRows = $result->num_rows;
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                          <?= $pingUrl ?>
-                                                                                                                                                                                                                        </code>
+                                                                                                                                                                                                                                                                          <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                        </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL" onclick="navigator.clipboard.writeText('<?= addslashes($pingUrl) ?>')
@@ -294,11 +294,30 @@ $totalRows = $result->num_rows;
               </td>
               <td class="text-center fw-bold" id="status-<?= $rowId ?>">⏳</td>
               <?php if (isset($_SESSION['user_id'])): ?>
-                <td class="text-center action-buttons">
-                  <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">✏️ แก้ไข</a>
-                  <a href="javascript:void(0)" onclick="deleteQueryAjax(<?= $row['id'] ?>, this)"
-                    class="btn btn-sm btn-danger">🗑️ ลบ</a>
+                <td class="action-buttons">
+
+                  <!-- บรรทัดแรก -->
+                  <div class="mb-1">
+                    <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">
+                      ✏️ แก้ไข
+                    </a>
+
+                    <a href="javascript:void(0)" onclick="deleteQueryAjax(<?= $row['id'] ?>, this)"
+                      class="btn btn-sm btn-danger">
+                      🗑️ ลบQuery
+                    </a>
+                  </div>
+
+                  <!-- บรรทัดที่สอง -->
+                  <div>
+                    <a href="javascript:void(0)" onclick="deleteTableOnly('<?= $row['query_name'] ?>', this)"
+                      class="btn btn-sm btn-secondary">
+                      🗂️ ลบTable
+                    </a>
+                  </div>
+
                 </td>
+
               <?php endif; ?>
             </tr>
           <?php endwhile ?>
@@ -459,8 +478,11 @@ $totalRows = $result->num_rows;
         paginateRows();
 
         const total = rows.length;
-        document.getElementById('resultCount').textContent =
-          `🔢 พบทั้งหมด ${total} รายการ / แสดง ${matchCount} รายการ${search ? 'ที่ตรงกับคำค้น' : ''}`;
+        const rc = document.getElementById('resultCount');
+        if (rc) {
+          rc.textContent = `🔢 พบทั้งหมด ${total} รายการ / แสดง ${matchCount} รายการ${search ? 'ที่ตรงกับคำค้น' : ''}`;
+        }
+
       }
 
       // ⌨️ Event ค้นหา/กรอง/ล้าง
@@ -639,7 +661,7 @@ $totalRows = $result->num_rows;
       paginateRows();
       filterRows();
 
-      // 🗑️ ลบ Query ผ่าน AJAX
+      // 🗑️ ลบ Query+table ผ่าน AJAX
       function deleteQueryAjax(id, btn) {
         if (!confirm("⚠️ ยืนยันการลบ?")) return;
 
@@ -648,24 +670,24 @@ $totalRows = $result->num_rows;
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `id=${encodeURIComponent(id)}`
         })
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-          })
-          .then(data => {
-            console.log('API response:', data);
+          .then(res => res.text())
+          .then(text => {
+            console.log("RAW:", text);
+            let data = JSON.parse(text);
 
             if (data.success) {
-              // ป้องกัน error ถ้า btn หรือ tr ไม่มีจริง
               if (btn && btn.closest('tr')) {
                 btn.closest('tr').remove();
               }
               showToast('✅ ลบเรียบร้อยแล้ว', 'success');
 
               if (typeof paginateRows === 'function') paginateRows();
-              if (typeof filterRows === 'function') filterRows(false);
+              try {
+                if (typeof filterRows === 'function') filterRows(false);
+              } catch (e) {
+                console.warn("filterRows error:", e);
+              }
+
 
             } else {
               showToast(`❌ ลบไม่สำเร็จ: ${data.error || 'ไม่ทราบสาเหตุ'}`, 'danger');
@@ -675,7 +697,32 @@ $totalRows = $result->num_rows;
             console.error('Fetch/JS error:', err);
             showToast('❌ ไม่สามารถเชื่อมต่อ server', 'danger');
           });
+
       }
+
+      // 🗑️ ลบ Table
+      function deleteTableOnly(queryName, btn) {
+        if (!confirm(`⚠️ ต้องการลบเฉพาะ Table: ${queryName} ?`)) return;
+
+        fetch('delete_table_only.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `query_name=${encodeURIComponent(queryName)}`
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showToast(`✅ ลบ Table ${queryName} สำเร็จ`, 'success');
+            } else {
+              showToast(`❌ ลบ Table ไม่สำเร็จ: ${data.error}`, 'danger');
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            showToast('❌ ไม่สามารถเชื่อมต่อ server', 'danger');
+          });
+      }
+
 
       // 🔔 Toast ทั่วไป
       function showToast(message, type = 'success') {

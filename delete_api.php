@@ -1,6 +1,10 @@
 <?php
 require __DIR__ . '/config.php';
 header('Content-Type: application/json; charset=utf-8');
+if (ob_get_length())
+    ob_clean();
+
+http_response_code(200);
 
 // ตรวจสอบสิทธิ์
 if (!isset($_SESSION['user_id'])) {
@@ -36,8 +40,10 @@ $nodeUrl = rtrim($ipServer, '/') . "/delete-query/" . urlencode($cleanQuery);
 $ch = curl_init($nodeUrl);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 $response = curl_exec($ch);
+
+$response = mb_convert_encoding($response, 'UTF-8', 'UTF-8');
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlErr = curl_error($ch);
 curl_close($ch);
@@ -73,5 +79,6 @@ $stmt->close();
 // ส่งผลลัพธ์กลับ browser
 echo json_encode([
     'success' => true,
-    'node_response' => $nodeData
-]);
+    'message' => $nodeData['message'] ?? 'ลบตารางสำเร็จ'
+], JSON_UNESCAPED_UNICODE);
+exit;
