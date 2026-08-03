@@ -118,7 +118,9 @@ $totalRows = $result->num_rows;
           <a href="create.php" class="btn btn-sm btn-success">➕ เพิ่ม Query</a>
           <a href="change_password.php" class="btn btn-sm btn-outline-secondary">เปลี่ยนรหัสผ่าน</a>
           <?php if ($userRole === 'admin'): ?>
-            <a href="admin.php" class="btn btn-sm btn-outline-dark">Admin Panel</a>
+            <a href="admin.php" rel="noopener" class="btn btn-sm btn-outline-dark">Admin Panel</a>
+            <a href="telemed_api_docs.php" rel="noopener" class="btn btn-sm btn-outline-info">Telemed API
+              Docs</a>
           <?php endif; ?>
           <a href="logout.php" class="btn btn-sm btn-outline-danger">ออกจากระบบ</a>
         <?php else: ?>
@@ -264,8 +266,8 @@ $totalRows = $result->num_rows;
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                  <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                </code>
+                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                    </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL" onclick="navigator.clipboard.writeText('<?= addslashes($pingUrl) ?>')

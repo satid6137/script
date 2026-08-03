@@ -45,6 +45,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
     }
 
+    // ⭐ reload-cron ⭐
+    $reloadUrl = rtrim($ipServer, '/') . "/reload-cron";
+
+    $rc = curl_init($reloadUrl);
+    curl_setopt($rc, CURLOPT_POST, true);
+    curl_setopt($rc, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($rc);
+    curl_close($rc);
+
     header("Location: cron_profiles.php");
     exit;
 }

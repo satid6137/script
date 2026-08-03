@@ -1,4 +1,6 @@
 <?php
+require __DIR__ . '/config.php';
+
 // ต้องมี url เสมอ
 if (!isset($_POST['url'])) {
   echo json_encode(['success' => false, 'error' => 'Missing URL']);
@@ -43,6 +45,19 @@ $resp = curl_exec($ch);
 $err = curl_error($ch);
 $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
+
+// ⭐ reload-cron ⭐
+if (!$err && $code >= 200 && $code < 300) {
+
+  // ใช้ $ipServer จาก config.php
+  $reloadUrl = rtrim($ipServer, '/') . "/reload-cron";
+
+  $rc = curl_init($reloadUrl);
+  curl_setopt($rc, CURLOPT_POST, true);
+  curl_setopt($rc, CURLOPT_RETURNTRANSFER, true);
+  curl_exec($rc);
+  curl_close($rc);
+}
 
 echo json_encode([
   'success' => !$err && $code >= 200 && $code < 300,
