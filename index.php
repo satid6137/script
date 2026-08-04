@@ -54,7 +54,6 @@ $result = $conn->query("
   ORDER BY sq.id DESC
 ");
 
-
 $totalRows = $result->num_rows;
 ?>
 <!DOCTYPE html>
@@ -159,6 +158,7 @@ $totalRows = $result->num_rows;
       <table class="table table-striped align-middle mb-0">
         <thead class="table-dark">
           <tr>
+            <th style="width: 60px;" class="text-center">#</th>
             <th style="width: 80px;">HIS</th>
             <th style="width: 300px;">ชื่อ Query</th>
             <th style="width: 250px;">Query</th>
@@ -172,7 +172,10 @@ $totalRows = $result->num_rows;
           </tr>
         </thead>
         <tbody id="queryTableBody">
-          <?php while ($row = $result->fetch_assoc()):
+          <?php
+          $totalRows = $result->num_rows;
+          $i = $totalRows;
+          while ($row = $result->fetch_assoc()):
             $queryNameRaw = $row['query_name'];
             $queryName = rawurlencode($queryNameRaw);
             $hisType = htmlspecialchars($row['his_type']);
@@ -191,6 +194,9 @@ $totalRows = $result->num_rows;
             ?>
             <tr data-his="<?= strtolower($hisType) ?>" data-query="<?= strtolower($queryNameRaw) ?>"
               data-user="<?= strtolower($createdBy) ?>">
+              <td class="text-center fw-bold">
+                <?= $i ?>
+              </td>
               <td>
                 <?= $hisType ?>
               </td>
@@ -266,12 +272,12 @@ $totalRows = $result->num_rows;
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                                                    </code>
+                                                                                                                                                                                                                                                                                                                                                              <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                                                            </code>
 
                     <!-- ปุ่มคัดลอก -->
-                    <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL" onclick="navigator.clipboard.writeText('<?= addslashes($pingUrl) ?>')
-        .then(() => { this.textContent='✅'; setTimeout(() => this.innerHTML='📋', 1500) })">
+                    <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"
+                      onclick="navigator.clipboard.writeText('<?= addslashes($pingUrl) ?>').then(() => { this.textContent='✅'; setTimeout(() => this.innerHTML='📋', 1500) })">
                       📋
                     </button>
 
@@ -335,7 +341,7 @@ $totalRows = $result->num_rows;
 
               <?php endif; ?>
             </tr>
-          <?php endwhile ?>
+            <?php $i--; endwhile ?>
         </tbody>
       </table>
     </div>
@@ -435,6 +441,14 @@ $totalRows = $result->num_rows;
             statusCell.textContent = '❌';
             showToast(`❌ ไม่สามารถเชื่อมต่อ server ได้: ${err.message}`, 'danger');
           });
+        fetch('log_post.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query_name: queryName,
+            url: url
+          })
+        });
       }
 
       // 🚀 POST ไป notify พร้อมอัปเดตสถานะ
