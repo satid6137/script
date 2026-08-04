@@ -1,0 +1,234 @@
+/* ============================================================
+   Hospital theme — ฟ้า/ขาว (Medical Blue) overlay on Bootstrap 5
+   Works on top of the existing Bootstrap classes already in the
+   markup; no framework migration, just visual refinement.
+   ============================================================ */
+
+:root {
+  --hos-blue-900: #0a3d63;
+  --hos-blue-700: #0e6ba8;
+  --hos-blue-600: #147ac2;
+  --hos-blue-500: #2f93d6;
+  --hos-blue-100: #e6f3fb;
+  --hos-blue-50: #f5faff;
+
+  --hos-ink: #1e293b;
+  --hos-muted: #64748b;
+  --hos-border: #dbe7f0;
+
+  --hos-success: #16a34a;
+  --hos-success-bg: #e8f8ee;
+  --hos-danger: #dc2626;
+  --hos-danger-bg: #fdecec;
+  --hos-warning: #d97706;
+  --hos-warning-bg: #fef3e2;
+
+  --hos-radius: 12px;
+  --hos-radius-sm: 8px;
+  --hos-shadow-sm: 0 1px 3px rgba(10, 61, 99, 0.08);
+  --hos-shadow-md: 0 8px 24px rgba(10, 61, 99, 0.10);
+}
+
+/* ---------- Base ---------- */
+body {
+  font-family: "IBM Plex Sans Thai", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  background: var(--hos-blue-50) !important;
+  color: var(--hos-ink);
+}
+
+h1, h2, h3, h4, h5, h6,
+.hos-brand, .hos-page-title {
+  font-family: "IBM Plex Sans Thai", "IBM Plex Sans", system-ui, sans-serif;
+  color: var(--hos-blue-900);
+  letter-spacing: -0.01em;
+}
+
+a { color: var(--hos-blue-700); }
+a:hover { color: var(--hos-blue-900); }
+
+::selection {
+  background: rgba(20, 122, 194, 0.35); /* hos-blue-600 แบบโปร่ง */
+  color: #000;
+}
+
+/* ---------- Topbar ---------- */
+.hos-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--hos-border);
+  box-shadow: var(--hos-shadow-sm);
+  padding: 0.85rem 0;
+  margin-bottom: 1.75rem;
+}
+
+.hos-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 600;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.hos-brand img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.hos-brand small {
+  display: block;
+  font-family: "Sarabun", sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--hos-muted);
+  letter-spacing: 0;
+}
+
+.hos-user-chip {
+  font-size: 0.85rem;
+  color: var(--hos-muted);
+  background: var(--hos-blue-50);
+  border: 1px solid var(--hos-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+}
+
+/* ---------- Page header ---------- */
+.hos-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.hos-page-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.hos-page-subtitle {
+  color: var(--hos-muted);
+  font-size: 0.9rem;
+}
+
+/* ---------- Cards / panels ---------- */
+.hos-card {
+  background: #fff;
+  border: 1px solid var(--hos-border);
+  border-radius: var(--hos-radius);
+  box-shadow: var(--hos-shadow-sm);
+  padding: 1.25rem 1.5rem;
+}
+
+.hos-toolbar {
+  background: #fff;
+  border: 1px solid var(--hos-border);
+  border-radius: var(--hos-radius);
+  box-shadow: var(--hos-shadow-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.hos-auth-card {
+  background: #fff;
+  border: 1px solid var(--hos-border);
+  border-radius: var(--hos-radius);
+  box-shadow: var(--hos-shadow-md);
+  padding: 2.25rem 2rem;
+}
+
+/* ---------- Buttons ---------- */
+.btn { border-radius: var(--hos-radius-sm); transition: all .15s ease; font-weight: 500; }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible, .form-control:focus-visible, a:focus-visible {
+  outline: 2px solid var(--hos-blue-500);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--hos-blue-600);
+  border-color: var(--hos-blue-600);
+}
+.btn-primary:hover, .btn-primary:focus {
+  background: var(--hos-blue-700);
+  border-color: var(--hos-blue-700);
+}
+
+.btn-outline-primary {
+  color: var(--hos-blue-700);
+  border-color: var(--hos-blue-500);
+}
+.btn-outline-primary:hover {
+  background: var(--hos-blue-600);
+  border-color: var(--hos-blue-600);
+}
+
+.btn-success { background: var(--hos-success); border-color: var(--hos-success); }
+.btn-success:hover { background: #128a3e; border-color: #128a3e; }
+
+.btn-outline-dark { color: var(--hos-blue-900); border-color: var(--hos-blue-900); }
+.btn-outline-dark:hover { background: var(--hos-blue-900); border-color: var(--hos-blue-900); }
+
+.btn-outline-info { color: var(--hos-blue-700); border-color: var(--hos-blue-500); }
+
+.btn-outline-secondary:hover { background: var(--hos-muted); border-color: var(--hos-muted); }
+
+.form-control, .form-select {
+  border-radius: var(--hos-radius-sm);
+  border-color: var(--hos-border);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--hos-blue-500);
+  box-shadow: 0 0 0 0.2rem rgba(20, 122, 194, 0.15);
+}
+
+/* ---------- Tables ---------- */
+.table-responsive,
+.hos-card, .hos-toolbar { }
+
+.table {
+  --bs-table-bg: transparent;
+}
+
+.table thead.table-dark th,
+.table thead th {
+  background: var(--hos-blue-900) !important;
+  color: #fff !important;
+  border-color: var(--hos-blue-900) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: var(--hos-blue-50);
+}
+
+.table td, .table th {
+  vertical-align: middle;
+  border-color: var(--hos-border);
+}
+
+/* ---------- Badges / status ---------- */
+.badge.bg-success { background-color: var(--hos-success) !important; }
+.badge.bg-secondary { background-color: #94a3b8 !important; }
+
+/* ---------- Alerts ---------- */
+.alert-danger {
+  background: var(--hos-danger-bg);
+  border-color: #f5c2c2;
+  color: var(--hos-danger);
+}
+
+/* ---------- Misc ---------- */
+.hos-footer {
+  color: var(--hos-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--hos-border);
+  padding-top: 1rem;
+  margin-top: 2rem;
+}
+
+pre { font-family: "Consolas", "SFMono-Regular", monospace; }
+
+.modal-header, .modal-content {
+  border-radius: var(--hos-radius);
+}
