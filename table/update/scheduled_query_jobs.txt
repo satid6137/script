@@ -1,0 +1,74 @@
+DELIMITER $$
+
+CREATE PROCEDURE update_scheduled_query_jobs_safe()
+BEGIN
+
+    -- id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND COLUMN_NAME='id'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+    END IF;
+
+    -- query_name
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND COLUMN_NAME='query_name'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD COLUMN query_name VARCHAR(100) NULL AFTER id;
+    END IF;
+
+    -- hos_code
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND COLUMN_NAME='hos_code'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD COLUMN hos_code VARCHAR(20) NULL AFTER query_name;
+    END IF;
+
+    -- cron_time
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND COLUMN_NAME='cron_time'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD COLUMN cron_time VARCHAR(20) NULL AFTER hos_code;
+    END IF;
+
+    -- active
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND COLUMN_NAME='active'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD COLUMN active TINYINT(1) NULL DEFAULT 1 AFTER cron_time;
+    END IF;
+
+    -- index: query_name
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND INDEX_NAME='query_name'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD INDEX query_name (query_name);
+    END IF;
+
+    -- index: hos_code
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_NAME='scheduled_query_jobs' AND INDEX_NAME='hos_code'
+    ) THEN
+        ALTER TABLE scheduled_query_jobs 
+            ADD INDEX hos_code (hos_code);
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- รัน procedure
+CALL update_scheduled_query_jobs_safe();

@@ -1,0 +1,110 @@
+-- เช็คและเพิ่มคอลัมน์ที่ขาด
+-- sql
+
+DELIMITER $$
+
+CREATE PROCEDURE update_cron_profiles_safe()
+BEGIN
+
+    -- id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='cron_profiles' AND COLUMN_NAME='id'
+    ) THEN
+        ALTER TABLE cron_profiles 
+            ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+    END IF;
+
+    -- label
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='cron_profiles' AND COLUMN_NAME='label'
+    ) THEN
+        ALTER TABLE cron_profiles 
+            ADD COLUMN label VARCHAR(100) NULL AFTER id;
+    END IF;
+
+    -- cron_expr
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='cron_profiles' AND COLUMN_NAME='cron_expr'
+    ) THEN
+        ALTER TABLE cron_profiles 
+            ADD COLUMN cron_expr VARCHAR(30) NOT NULL AFTER label;
+    END IF;
+
+    -- description
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='cron_profiles' AND COLUMN_NAME='description'
+    ) THEN
+        ALTER TABLE cron_profiles 
+            ADD COLUMN description MEDIUMTEXT NULL AFTER cron_expr;
+    END IF;
+
+    -- notify_mode
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='cron_profiles' AND COLUMN_NAME='notify_mode'
+    ) THEN
+        ALTER TABLE cron_profiles 
+            ADD COLUMN notify_mode ENUM('FAIL_ONLY','ALL') NOT NULL DEFAULT 'ALL' AFTER description;
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- รัน procedure
+CALL update_cron_profiles_safe();
+
+
+
+
+-- เช็คและเพิ่มข้อมูล row ถ้ายังไม่มี
+-- sql
+
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 11, '⚡ ทุก 5 นาที', '0 */5 * * * *', 'ใช้สำหรับระบบที่ต้องอัปเดตข้อมูลเร็วมาก', 'FAIL_ONLY'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 11);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 12, '🔁 ทุก 10 นาที', '0 */10 * * * *', 'ดึงข้อมูลแบบเกือบ real-time', 'FAIL_ONLY'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 12);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 13, '🕐 ทุก 15 นาที', '0 */15 * * * *', 'เหมาะกับข้อมูลที่เปลี่ยนแปลงบ่อย', 'FAIL_ONLY'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 13);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 14, '🕒 ทุก 30 นาที', '0 */30 * * * *', 'ใช้สำหรับ lab, queue หรือ notify', 'FAIL_ONLY'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 14);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 15, '🕓 ทุกชั่วโมง', '0 0 * * * *', 'เหมาะสำหรับ summary report', 'ALL'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 15);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 16, '🌙 เที่ยงคืน', '0 0 0 * * *', 'สรุปรายวัน เช่น admit, discharge', 'ALL'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 16);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 17, '📆 ทุกวันจันทร์', '0 0 0 * * 1', 'รันเฉพาะวันจันทร์', 'ALL'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 17);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 18, '🛠 เฉพาะเวลา 06:30', '0 30 6 * * *', 'กรณีต้องดึงเช้าแบบเฉพาะเจาะจง', 'ALL'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 18);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 19, '📅 ทุก 1 เดือน', '0 0 1 1 * *', 'ทำงานทุกวันที่ 1 ของเดือน', 'ALL'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 19);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 20, '🔕 ไม่ตั้งเวลา (manual)', '-', 'ผู้ใช้จะสั่ง post ด้วยตนเองเท่านั้น', 'ALL'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 20);
+
+INSERT INTO cron_profiles (id, label, cron_expr, description, notify_mode)
+SELECT 21, '🕒 ทุก 30 นาที', '0 */30 * * * *', 'ใช้สำหรับ lab, queue', 'FAIL_ONLY'
+WHERE NOT EXISTS (SELECT 1 FROM cron_profiles WHERE id = 21);

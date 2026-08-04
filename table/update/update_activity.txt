@@ -1,0 +1,98 @@
+DELIMITER $$
+
+CREATE PROCEDURE update_activity_log_safe()
+BEGIN
+
+    -- log_id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME='activity_log' AND COLUMN_NAME='log_id'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD COLUMN log_id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+    END IF;
+
+    -- user_id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME='activity_log' AND COLUMN_NAME='user_id'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD COLUMN user_id INT(11) NOT NULL AFTER log_id;
+    END IF;
+
+    -- action_type
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME='activity_log' AND COLUMN_NAME='action_type'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD COLUMN action_type VARCHAR(50) NULL AFTER user_id;
+    END IF;
+
+    -- target
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME='activity_log' AND COLUMN_NAME='target'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD COLUMN target VARCHAR(100) NULL AFTER action_type;
+    END IF;
+
+    -- detail
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME='activity_log' AND COLUMN_NAME='detail'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD COLUMN detail MEDIUMTEXT NULL AFTER target;
+    END IF;
+
+    -- timestamp
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME='activity_log' AND COLUMN_NAME='timestamp'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD COLUMN `timestamp` DATETIME NULL DEFAULT CURRENT_TIMESTAMP AFTER detail;
+    END IF;
+
+    -- charset/collation
+    ALTER TABLE activity_log 
+        MODIFY action_type VARCHAR(50)
+            CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL;
+
+    ALTER TABLE activity_log 
+        MODIFY target VARCHAR(100)
+            CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL;
+
+    ALTER TABLE activity_log 
+        MODIFY detail MEDIUMTEXT
+            CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL;
+
+    -- index
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_NAME='activity_log' AND INDEX_NAME='user_id'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD INDEX user_id (user_id);
+    END IF;
+
+    -- foreign key
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+        WHERE TABLE_NAME='activity_log' AND CONSTRAINT_NAME='activity_log_ibfk_1'
+    ) THEN
+        ALTER TABLE activity_log 
+            ADD CONSTRAINT activity_log_ibfk_1
+                FOREIGN KEY (user_id) REFERENCES user(id)
+                ON DELETE RESTRICT ON UPDATE RESTRICT;
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- รัน procedure
+CALL update_activity_log_safe();

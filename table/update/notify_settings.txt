@@ -1,0 +1,119 @@
+DELIMITER $$
+
+CREATE PROCEDURE update_notify_settings_safe()
+BEGIN
+
+    -- id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='id'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+    END IF;
+
+    -- query_name
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='query_name'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN query_name VARCHAR(100) NULL AFTER id;
+    END IF;
+
+    -- hos_code
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='hos_code'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN hos_code VARCHAR(5) NULL AFTER query_name;
+    END IF;
+
+    -- notify_type
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='notify_type'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN notify_type ENUM('none','line','moph') NOT NULL DEFAULT 'none' AFTER hos_code;
+    END IF;
+
+    -- line_token
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='line_token'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN line_token TEXT NULL AFTER notify_type;
+    END IF;
+
+    -- moph_client_key
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='moph_client_key'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN moph_client_key TEXT NULL AFTER line_token;
+    END IF;
+
+    -- moph_secret_key
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='moph_secret_key'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN moph_secret_key TEXT NULL AFTER moph_client_key;
+    END IF;
+
+    -- cron_id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='cron_id'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN cron_id INT(11) NULL AFTER moph_secret_key;
+    END IF;
+
+    -- created_at
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='created_at'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP AFTER cron_id;
+    END IF;
+
+    -- description
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='notify_settings' AND COLUMN_NAME='description'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD COLUMN description TEXT NULL AFTER created_at;
+    END IF;
+
+    -- index: query_name
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_NAME='notify_settings' AND INDEX_NAME='query_name'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD INDEX query_name (query_name);
+    END IF;
+
+    -- index: hos_code
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_NAME='notify_settings' AND INDEX_NAME='hos_code'
+    ) THEN
+        ALTER TABLE notify_settings 
+            ADD INDEX hos_code (hos_code);
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- รัน procedure
+CALL update_notify_settings_safe();

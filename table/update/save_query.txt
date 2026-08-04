@@ -1,0 +1,102 @@
+DELIMITER $$
+
+CREATE PROCEDURE update_save_query_safe()
+BEGIN
+
+    -- id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='id'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+    END IF;
+
+    -- his_type
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='his_type'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN his_type VARCHAR(50) NULL AFTER id;
+    END IF;
+
+    -- query_name
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='query_name'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN query_name VARCHAR(100) NULL AFTER his_type;
+    END IF;
+
+    -- query_text
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='query_text'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN query_text LONGTEXT NOT NULL AFTER query_name;
+    END IF;
+
+    -- created_at
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='created_at'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP AFTER query_text;
+    END IF;
+
+    -- last_post_at
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='last_post_at'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN last_post_at DATETIME NULL AFTER created_at;
+    END IF;
+
+    -- created_by
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='created_by'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN created_by INT(11) NULL AFTER last_post_at;
+    END IF;
+
+    -- cron_id
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='cron_id'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN cron_id INT(11) NULL AFTER created_by;
+    END IF;
+
+    -- hos_code
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME='save_query' AND COLUMN_NAME='hos_code'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD COLUMN hos_code VARCHAR(5) NOT NULL DEFAULT '' AFTER cron_id;
+    END IF;
+
+    -- Unique Index: query_name
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE TABLE_NAME='save_query' AND INDEX_NAME='query_name'
+    ) THEN
+        ALTER TABLE save_query 
+            ADD UNIQUE INDEX query_name (query_name);
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- รัน procedure
+CALL update_save_query_safe();
+
