@@ -194,7 +194,7 @@ $totalRows = $result->num_rows;
             ?>
             <tr data-his="<?= strtolower($hisType) ?>" data-query="<?= strtolower($queryNameRaw) ?>"
               data-user="<?= strtolower($createdBy) ?>">
-              <td class="text-center fw-bold">
+              <td class="text-center">
                 <?= $i ?>
               </td>
               <td>
