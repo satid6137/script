@@ -55,6 +55,65 @@ $result = $conn->query("
 ");
 
 $totalRows = $result->num_rows;
+
+// ตรวจสอบว่ามีไฟล์ version-detail.php จริงไหม
+$versionDetailExists = file_exists(__DIR__ . "/version-detail.php");
+
+// โหลดเวอร์ชันปัจจุบันของ PHP Script
+$phpCurrentUrl = "http://" . $_ENV['DB_HOST'] . "/script/version.txt";
+$phpCurrent = @file_get_contents($phpCurrentUrl);
+$phpCurrent = $phpCurrent ? trim($phpCurrent) : null;
+
+// โหลดเวอร์ชันล่าสุดของ Script
+$phpLastUrl = "https://website.hangchathospital.com/script/version.txt";
+$phpLast = @file_get_contents($phpLastUrl);
+$phpLast = $phpLast ? trim($phpLast) : null;
+
+// โหลดเวอร์ชันจาก Node.js API
+$nodejs = $_ENV['NODEJS_URL'];
+$hosCode = $_ENV['HOS_CODE'];
+$apiKey = $_ENV['API_KEY'];
+
+$urlAPI = "{$nodejs}/query/version/{$hosCode}";
+
+$ch = curl_init($urlAPI);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  "x-api-key: {$apiKey}"
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$apiData = $response ? json_decode($response, true) : null;
+
+if (is_array($apiData) && isset($apiData[0])) {
+  $clientVersion = $apiData[0]['client_version'] ?? null;
+  $serverVersion = $apiData[0]['server_version'] ?? null;
+  $telemedVersion = $apiData[0]['telemed_version'] ?? null;
+} else {
+  $clientVersion = $serverVersion = $telemedVersion = null;
+}
+
+// ตรวจสอบว่ามีอัพเดทไหม
+$hasUpdate = false;
+
+if ($phpCurrent !== $phpLast)
+  $hasUpdate = true;
+if ($clientVersion !== $phpLast)
+  $hasUpdate = true;
+if ($serverVersion !== $phpLast)
+  $hasUpdate = true;
+if ($telemedVersion !== $phpLast)
+  $hasUpdate = true;
+
+// ข้อความปุ่ม
+if ($hasUpdate) {
+  $buttonText = "V.$phpCurrent (มีอัพเดท)";
+} else {
+  $buttonText = "V.$phpCurrent";
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -98,6 +157,31 @@ $totalRows = $result->num_rows;
       margin-right: 4px;
     }
   </style>
+  <style>
+    .btn-pink {
+      background-color: #ff4fa3;
+      color: white;
+      font-weight: 600;
+      border-radius: 6px;
+    }
+
+    .btn-pink:hover {
+      background-color: #e63f92;
+      color: white;
+    }
+
+    .hos-topbar .container {
+      flex-wrap: nowrap !important;
+    }
+
+    .hos-brand {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex: 0 0 auto !important;
+    }
+  </style>
 
 </head>
 
@@ -105,12 +189,23 @@ $totalRows = $result->num_rows;
 
   <header class="hos-topbar">
     <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <a href="index.php" class="hos-brand">
-        <img src="/script/assets/icons/health48.png" alt="โลโก้โรงพยาบาลห้างฉัตร">
-        <span>
-          <?= $hospital ?><small>ระบบจัดการ Query API</small>
-        </span>
-      </a>
+
+      <div class="d-flex align-items-center gap-2">
+        <a href="index.php" class="hos-brand">
+          <img src="/script/assets/icons/health48.png" alt="โลโก้โรงพยาบาลห้างฉัตร">
+          <span>
+            <?= $hospital ?><small>ระบบจัดการ Query API</small>
+          </span>
+        </a>
+
+        <?php if ($versionDetailExists): ?>
+          <a href="version-detail.php" class="btn btn-sm btn-pink">
+            🔄 <?= $buttonText ?>
+          </a>
+        <?php endif; ?>
+
+      </div>
+
       <div class="d-flex align-items-center flex-wrap gap-2">
         <?php if (isset($_SESSION['user_id'])): ?>
           <span class="hos-user-chip">👤 <?= htmlspecialchars($username) ?> · <?= htmlspecialchars($userRole) ?></span>
@@ -272,8 +367,8 @@ $totalRows = $result->num_rows;
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                                                                                              <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                                                                                            </code>
+                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"

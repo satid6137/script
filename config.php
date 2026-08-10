@@ -44,5 +44,5 @@ $apiKey = $_ENV['API_KEY'];
 $summaryKey = $_ENV['SUMMARY_KEY'];
 $nodejs = $_ENV['NODEJS_URL'];
 $hospital = $_ENV['HOSPITAL_NAME'];
-$ipServertelemed = $_ENV['IP_SERVER_Telemed'];
+//$phpLastUrl = $_ENV['IP_SERVER_Version'];
 ?>
