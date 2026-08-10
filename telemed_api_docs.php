@@ -20,32 +20,105 @@ $cfg = $conn->query("SELECT * FROM telemed_config LIMIT 1")->fetch_assoc();
 $cronProfiles = $conn->query("SELECT id,label,cron_expr FROM cron_profiles ORDER BY id");
 $today = date("Y-m-d");
 ?>
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>Telemed API Docs |
-        <?= $hospital ?>
-    </title>
+    <title>Telemed API Docs | <?= $hospital ?></title>
+
+    <!-- Icons -->
     <link rel="icon" href="/script/assets/icons/health48.png" type="image/png">
     <link rel="apple-touch-icon" href="/script/assets/icons/health48.png">
+
+    <!-- Fonts + Bootstrap + Theme -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/script/assets/css/theme.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background: #eef2f7;
+            padding-bottom: 40px;
+        }
+
+        .hos-page-header {
+            background: #ffffff;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .hos-page-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .hos-page-subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .card {
+            border-radius: 12px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        label.fw-bold {
+            font-weight: 600 !important;
+        }
+
+        .btn-pink {
+            background-color: #ff4fa3;
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .btn-pink:hover {
+            background-color: #e63f92;
+            color: white;
+        }
+
+        .form-text {
+            color: #777;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
     <div class="container" style="max-width: 900px;">
 
+        <!-- Header -->
         <div class="hos-page-header mt-4 mb-4">
             <h1 class="hos-page-title">Telemed API Docs</h1>
             <p class="hos-page-subtitle mb-0">ตั้งค่าการส่ง Telemed API โดยใช้ระบบ API-Query</p>
         </div>
 
+        <!-- Saved Alert -->
         <?php if (isset($_GET['saved'])): ?>
-            <div class="alert alert-success">บันทึกข้อมูลเรียบร้อยแล้ว</div>
+            <div class="alert alert-success shadow-sm">บันทึกข้อมูลเรียบร้อยแล้ว</div>
         <?php endif; ?>
 
+        <!-- Main Card -->
         <div class="card shadow-sm">
             <div class="card-body">
 
@@ -56,8 +129,7 @@ $today = date("Y-m-d");
                         <label class="fw-bold">วันที่รายงาน</label>
                         <input type="date" name="report_date" class="form-control" value="<?= $today ?>" readonly>
                         <div class="form-text">
-                            หมายเหตุ: ระบบ Telemed API Docs จะดึงข้อมูลจาก Query API ตามช่วงเวลาที่กำหนดในระบบ Query
-                            เดิม
+                            ระบบ Telemed API Docs จะดึงข้อมูลจาก Query API ตามช่วงเวลาที่กำหนดในระบบ Query เดิม
                         </div>
                     </div>
 
@@ -103,14 +175,12 @@ $today = date("Y-m-d");
                     <!-- Telemed API -->
                     <h5 class="fw-bold">Telemed API</h5>
 
-                    <!-- HOS CODE -->
                     <div class="mb-3">
                         <label class="fw-bold">HOS CODE</label>
                         <input type="text" name="hos_code" class="form-control" value="<?= $cfg['hos_code'] ?>">
                         <div class="form-text">รหัสสถานพยาบาล เช่น 11156</div>
                     </div>
 
-                    <!-- Node.js URL -->
                     <div class="mb-3">
                         <label class="fw-bold">Node.js API URL</label>
                         <input type="text" name="nodejs_url" class="form-control" value="<?= $cfg['nodejs_url'] ?>">
@@ -127,10 +197,12 @@ $today = date("Y-m-d");
 
                     <!-- MOPH Notify -->
                     <h5 class="fw-bold">MOPH Notify</h5>
+
                     <div class="mb-3">
                         <label class="fw-bold">Client ID</label>
                         <input type="text" name="client_id" class="form-control" value="<?= $cfg['client_id'] ?>">
                     </div>
+
                     <div class="mb-3">
                         <label class="fw-bold">Client Secret</label>
                         <input type="text" name="client_secret" class="form-control"
@@ -157,6 +229,7 @@ $today = date("Y-m-d");
                         </select>
                     </div>
 
+                    <!-- Buttons -->
                     <div class="d-flex gap-2 mt-4">
                         <button class="btn btn-primary">💾 บันทึก</button>
                         <a href="telemed_api_send.php" class="btn btn-success">📤 ส่ง Telemed (Manual)</a>

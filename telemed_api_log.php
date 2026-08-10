@@ -43,17 +43,73 @@ $summary = $conn->query("
         SUM(status!='success') AS fail_count
     FROM telemed_log
 ")->fetch_assoc();
+
+$limit = $_GET['limit'] ?? 10;
+$limit = ($limit === 'all') ? 999999 : intval($limit);
+
+$page = $_GET['page'] ?? 1;
+$offset = ($page - 1) * $limit;
+
+// นับจำนวนทั้งหมด
+$totalRows = $conn->query("SELECT COUNT(*) AS c FROM telemed_log WHERE $where")->fetch_assoc()['c'];
+$totalPages = ceil($totalRows / $limit);
+
+// ดึงข้อมูลตาม limit + offset
+$logs = $conn->query("
+    SELECT * FROM telemed_log 
+    WHERE $where 
+    ORDER BY id DESC 
+    LIMIT $limit OFFSET $offset
+");
 ?>
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
     <title>Telemed Log | <?= $hospital ?></title>
+
     <link rel="icon" href="/script/assets/icons/health48.png" type="image/png">
     <link rel="apple-touch-icon" href="/script/assets/icons/health48.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/script/assets/css/theme.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background: #eef2f7;
+        }
+
+        .card {
+            border-radius: 12px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
 </head>
+
 
 <body class="p-4 bg-light">
 
@@ -114,6 +170,21 @@ $summary = $conn->query("
         <a href="telemed_api_log_export.php" class="btn btn-success">📤 Export CSV</a>
     </div>
 
+    <form class="mb-3">
+        <label class="fw-bold">แสดงผล:</label>
+        <select name="limit" class="form-select w-auto d-inline-block" onchange="this.form.submit()">
+            <option value="10" <?= $limit == 10 ? 'selected' : '' ?>>10</option>
+            <option value="20" <?= $limit == 20 ? 'selected' : '' ?>>20</option>
+            <option value="50" <?= $limit == 50 ? 'selected' : '' ?>>50</option>
+            <option value="100" <?= $limit == 100 ? 'selected' : '' ?>>100</option>
+            <option value="all" <?= $limit > 100 ? 'selected' : '' ?>>ทั้งหมด</option>
+        </select>
+
+        <!-- คงค่าฟิลเตอร์เดิม -->
+        <input type="hidden" name="date" value="<?= $_GET['date'] ?? '' ?>">
+        <input type="hidden" name="status" value="<?= $_GET['status'] ?? '' ?>">
+    </form>
+
     <!-- Log Table -->
     <table class="table table-bordered table-sm bg-white">
         <thead class="table-dark">
@@ -145,6 +216,20 @@ $summary = $conn->query("
             <?php endwhile; ?>
         </tbody>
     </table>
+    <nav>
+        <ul class="pagination justify-content-center mt-3">
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= ($i == $page ? 'active' : '') ?>">
+                    <a class="page-link"
+                        href="?page=<?= $i ?>&limit=<?= $_GET['limit'] ?? 10 ?>&date=<?= $_GET['date'] ?? '' ?>&status=<?= $_GET['status'] ?? '' ?>">
+                        <?= $i ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
+
+        </ul>
+    </nav>
 
 </body>
 
