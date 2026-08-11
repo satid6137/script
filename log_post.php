@@ -3,7 +3,6 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require __DIR__ . '/config.php';
 require_once 'log_helper.php';
-session_start();
 
 // ✅ รับข้อมูล JSON จาก client
 $data = json_decode(file_get_contents("php://input"), true);

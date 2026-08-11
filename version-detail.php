@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require __DIR__ . '/config.php';
 
 /* -------------------------
@@ -13,7 +15,7 @@ function loadVersion($url)
 /* -------------------------
    1) โหลดเวอร์ชัน script (ปัจจุบัน)
 -------------------------- */
-$phpCurrentUrl = "http://" . $_ENV['DB_HOST'] . "/script/version.txt";
+$phpCurrentUrl = "http://" . $_ENV['DB_PHP'] . "/script/version.txt";
 $phpCurrent = loadVersion($phpCurrentUrl);
 
 /* -------------------------
@@ -25,7 +27,7 @@ $phpLast = loadVersion($phpLastUrl);
 /* -------------------------
    3) โหลดเวอร์ชันจาก nodejs-server API (ใช้ curl + header)
 -------------------------- */
-$nodejs = $_ENV['NODEJS_URL'];
+$nodejs = $_ENV['IP_NODEJS'];
 $hosCode = $_ENV['HOS_CODE'];
 $apiKey = $_ENV['API_KEY'];
 

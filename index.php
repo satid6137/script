@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require __DIR__ . '/config.php';
 require_once 'log_helper.php';
+require_once 'version_helper.php';
 
 $username = null;
 $userRole = null;
@@ -56,65 +57,17 @@ $result = $conn->query("
 
 $totalRows = $result->num_rows;
 
-// ตรวจสอบว่ามีไฟล์ version-detail.php จริงไหม
+// โหลดเวอร์ชันทั้งหมดจาก helper
+$version = loadAllVersions();
+
 $versionDetailExists = file_exists(__DIR__ . "/version-detail.php");
 
-// โหลดเวอร์ชันปัจจุบันของ PHP Script
-$phpCurrentUrl = "http://" . $_ENV['DB_HOST'] . "/script/version.txt";
-$phpCurrent = @file_get_contents($phpCurrentUrl);
-$phpCurrent = $phpCurrent ? trim($phpCurrent) : null;
-
-// โหลดเวอร์ชันล่าสุดของ Script
-$phpLastUrl = "https://website.hangchathospital.com/script/version.txt";
-$phpLast = @file_get_contents($phpLastUrl);
-$phpLast = $phpLast ? trim($phpLast) : null;
-
-// โหลดเวอร์ชันจาก Node.js API
-$nodejs = $_ENV['NODEJS_URL'];
-$hosCode = $_ENV['HOS_CODE'];
-$apiKey = $_ENV['API_KEY'];
-
-$urlAPI = "{$nodejs}/query/version/{$hosCode}";
-
-$ch = curl_init($urlAPI);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-  "x-api-key: {$apiKey}"
-]);
-
-$response = curl_exec($ch);
-curl_close($ch);
-
-$apiData = $response ? json_decode($response, true) : null;
-
-if (is_array($apiData) && isset($apiData[0])) {
-  $clientVersion = $apiData[0]['client_version'] ?? null;
-  $serverVersion = $apiData[0]['server_version'] ?? null;
-  $telemedVersion = $apiData[0]['telemed_version'] ?? null;
-} else {
-  $clientVersion = $serverVersion = $telemedVersion = null;
-}
-
-// ตรวจสอบว่ามีอัพเดทไหม
-$hasUpdate = false;
-
-if ($phpCurrent !== $phpLast)
-  $hasUpdate = true;
-if ($clientVersion !== $phpLast)
-  $hasUpdate = true;
-if ($serverVersion !== $phpLast)
-  $hasUpdate = true;
-if ($telemedVersion !== $phpLast)
-  $hasUpdate = true;
-
-// ข้อความปุ่ม
-if ($hasUpdate) {
-  $buttonText = "V.$phpCurrent (มีอัพเดท)";
-} else {
-  $buttonText = "V.$phpCurrent";
-}
-
+// ข้อความปุ่มเวอร์ชัน
+$buttonText = $version['hasUpdate']
+  ? "V.{$version['phpCurrent']} (มีอัพเดท)"
+  : "V.{$version['phpCurrent']}";
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -367,8 +320,8 @@ if ($hasUpdate) {
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"

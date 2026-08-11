@@ -1,7 +1,6 @@
 <?php
 require __DIR__ . '/config.php';
 require_once 'log_helper.php';
-#session_start();
 
 if (isset($_SESSION['user_id'])) {
   logAction($conn, $_SESSION['user_id'], 'logout', null, 'ออกจากระบบ');

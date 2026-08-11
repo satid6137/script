@@ -1,8 +1,7 @@
 <?php
 require __DIR__ . '/config.php';
 require_once 'log_helper.php'; // ถ้ามีระบบ log
-if (session_status() === PHP_SESSION_NONE)
-  session_start();
+
 if (!isset($_SESSION['user_id'])) {
   header("Location: login.php?timeout=1");
   exit;

@@ -1,5 +1,4 @@
 <?php
-// log_helper.php
 function logAction($conn, $userId, $actionType, $target = null, $detail = null)
 {
   if (!$userId || !$actionType)
@@ -10,4 +9,3 @@ function logAction($conn, $userId, $actionType, $target = null, $detail = null)
   $stmt->execute();
   $stmt->close();
 }
-?>

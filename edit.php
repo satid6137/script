@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/config.php';
+
 if (!isset($_SESSION['user_id'])) {
   header("Location: login.php?timeout=1");
   exit;

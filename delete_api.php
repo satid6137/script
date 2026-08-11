@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/config.php';
+
 header('Content-Type: application/json; charset=utf-8');
 if (ob_get_length())
     ob_clean();

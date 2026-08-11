@@ -1,12 +1,7 @@
 <?php
-ob_start();
-require __DIR__ . '/vendor/autoload.php';
-
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
 
 /* -------------------------
-   Session Configuration
+   Session Configuration (ต้องมาก่อน autoload)
 -------------------------- */
 session_set_cookie_params([
     'path' => $_ENV['SESSION_PATH'] ?? '/',
@@ -20,6 +15,14 @@ session_name($_ENV['SESSION_NAME'] ?? 'script');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+/* -------------------------
+   Autoload + Dotenv
+-------------------------- */
+require __DIR__ . '/vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 /* -------------------------
    Database Connection
@@ -44,5 +47,3 @@ $apiKey = $_ENV['API_KEY'];
 $summaryKey = $_ENV['SUMMARY_KEY'];
 $nodejs = $_ENV['NODEJS_URL'];
 $hospital = $_ENV['HOSPITAL_NAME'];
-//$phpLastUrl = $_ENV['IP_SERVER_Version'];
-?>

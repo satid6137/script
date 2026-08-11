@@ -1,8 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require __DIR__ . '/config.php';
 require_once 'log_helper.php';
-
-// ❌ ห้ามมี session_start() เพราะ config.php จัดการให้แล้ว
 
 if (!isset($_SESSION['user_id'])) {
   header("Location: login.php?timeout=1");
@@ -69,6 +69,7 @@ if (isset($_GET['action'], $_GET['id'])) {
 // ดึงข้อมูล user + สถานะ 2FA
 $users = $conn->query("SELECT id, username, role, twofa_enabled FROM user WHERE active = 1 ORDER BY id");
 ?>
+
 <!DOCTYPE html>
 <html>
 
