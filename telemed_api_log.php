@@ -44,7 +44,7 @@ $summary = $conn->query("
     FROM telemed_log
 ")->fetch_assoc();
 
-$limit = $_GET['limit'] ?? 10;
+$limit = $_GET['limit'] ?? 20;
 $limit = ($limit === 'all') ? 999999 : intval($limit);
 
 $page = $_GET['page'] ?? 1;
@@ -222,7 +222,7 @@ $logs = $conn->query("
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <li class="page-item <?= ($i == $page ? 'active' : '') ?>">
                     <a class="page-link"
-                        href="?page=<?= $i ?>&limit=<?= $_GET['limit'] ?? 10 ?>&date=<?= $_GET['date'] ?? '' ?>&status=<?= $_GET['status'] ?? '' ?>">
+                        href="?page=<?= $i ?>&limit=<?= $_GET['limit'] ?? 20 ?>&date=<?= $_GET['date'] ?? '' ?>&status=<?= $_GET['status'] ?? '' ?>">
                         <?= $i ?>
                     </a>
                 </li>

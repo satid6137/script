@@ -1,21 +1,4 @@
 <?php
-
-/* -------------------------
-   Session Configuration (ต้องมาก่อน autoload)
--------------------------- */
-session_set_cookie_params([
-    'path' => $_ENV['SESSION_PATH'] ?? '/',
-    'secure' => ($_ENV['SESSION_SECURE'] ?? 'false') === 'true',
-    'httponly' => true,
-    'samesite' => $_ENV['SESSION_SAMESITE'] ?? 'Lax'
-]);
-
-session_name($_ENV['SESSION_NAME'] ?? 'script');
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 /* -------------------------
    Autoload + Dotenv
 -------------------------- */
@@ -23,6 +6,22 @@ require __DIR__ . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
+
+/* -------------------------
+   Session Configuration (ต้องมาก่อน autoload)
+-------------------------- */
+session_set_cookie_params([
+   'path' => $_ENV['SESSION_PATH'] ?? '/',
+   'secure' => ($_ENV['SESSION_SECURE'] ?? 'false') === 'true',
+   'httponly' => true,
+   'samesite' => $_ENV['SESSION_SAMESITE'] ?? 'Lax'
+]);
+
+session_name($_ENV['SESSION_NAME'] ?? 'script');
+
+if (session_status() === PHP_SESSION_NONE) {
+   session_start();
+}
 
 /* -------------------------
    Database Connection
@@ -35,7 +34,7 @@ $port = $_ENV['DB_PORT'] ?? 3306;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+   die("Connection failed: " . $conn->connect_error);
 }
 
 /* -------------------------

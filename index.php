@@ -320,8 +320,8 @@ $buttonText = $version['hasUpdate']
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            </code>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"
@@ -400,7 +400,7 @@ $buttonText = $version['hasUpdate']
         <label>แสดง:</label>
         <select id="rowsPerPage" class="form-select d-inline-block w-auto">
           <option value="10">10</option>
-          <option value="20">20</option>
+          <option value="20" selected>20</option>
           <option value="50">50</option>
           <option value="100">100</option>
           <option value="200">200</option>
@@ -674,7 +674,7 @@ $buttonText = $version['hasUpdate']
 
       // 📄 Pagination
       let currentPage = 1;
-      let rowsPerPage = parseInt(document.getElementById('rowsPerPage')?.value) || 10;
+      let rowsPerPage = parseInt(document.getElementById('rowsPerPage')?.value) || 20;
 
       function paginateRows() {
         const rows = document.querySelectorAll('#queryTableBody tr');

@@ -60,10 +60,12 @@ $stmt->execute();
 $stmt->close();
 
 // ⭐ reload-cron ⭐
-$reloadUrl = rtrim($ipServertelemed, '/') . "/reload-cron";
+$reloadUrl = rtrim($_ENV['IP_TELEMED'], '/') . "/reload-cron";
 
 $rc = curl_init($reloadUrl);
 curl_setopt($rc, CURLOPT_POST, true);
+curl_setopt($rc, CURLOPT_POSTFIELDS, json_encode(["reload" => true]));
+curl_setopt($rc, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
 curl_setopt($rc, CURLOPT_RETURNTRANSFER, true);
 curl_exec($rc);
 curl_close($rc);
