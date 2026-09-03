@@ -36,15 +36,13 @@ function loadVersionFromNode()
     if (is_array($apiData) && isset($apiData[0])) {
         return [
             "client" => $apiData[0]['client_version'] ?? null,
-            "server" => $apiData[0]['server_version'] ?? null,
-            "telemed" => $apiData[0]['telemed_version'] ?? null
+            "server" => $apiData[0]['server_version'] ?? null
         ];
     }
 
     return [
         "client" => null,
-        "server" => null,
-        "telemed" => null
+        "server" => null
     ];
 }
 
@@ -67,15 +65,13 @@ function loadAllVersions()
     $hasUpdate =
         ($phpCurrent !== $phpLast) ||
         ($nodeVersions['client'] !== $phpLast) ||
-        ($nodeVersions['server'] !== $phpLast) ||
-        ($nodeVersions['telemed'] !== $phpLast);
+        ($nodeVersions['server'] !== $phpLast);
 
     return [
         "phpCurrent" => $phpCurrent,
         "phpLast" => $phpLast,
         "clientVersion" => $nodeVersions['client'],
         "serverVersion" => $nodeVersions['server'],
-        "telemedVersion" => $nodeVersions['telemed'],
         "hasUpdate" => $hasUpdate
     ];
 }

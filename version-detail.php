@@ -51,9 +51,8 @@ $apiData = $response ? json_decode($response, true) : null;
 if (is_array($apiData) && isset($apiData[0])) {
     $clientVersion = $apiData[0]['client_version'] ?? null;
     $serverVersion = $apiData[0]['server_version'] ?? null;
-    $telemedVersion = $apiData[0]['telemed_version'] ?? null;
 } else {
-    $clientVersion = $serverVersion = $telemedVersion = null;
+    $clientVersion = $serverVersion = null;
 }
 
 /* -------------------------
@@ -197,14 +196,6 @@ function checkVersion($name, $current, $last)
                 <div
                     class="status <?= ($serverVersion === null ? 'fail' : ($serverVersion == $phpLast ? 'ok' : 'update')) ?>">
                     <?= checkVersion("Node.js Server", $serverVersion, $phpLast) ?>
-                </div>
-            </div>
-
-            <div class="version-item">
-                <div class="version-name">Telemed API Docs</div>
-                <div
-                    class="status <?= ($telemedVersion === null ? 'fail' : ($telemedVersion == $phpLast ? 'ok' : 'update')) ?>">
-                    <?= checkVersion("Telemed API Docs", $telemedVersion, $phpLast) ?>
                 </div>
             </div>
 
