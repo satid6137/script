@@ -105,6 +105,11 @@ $sql = "SELECT l.*, u.username
 $result = $conn->query($sql);
 
 // -----------------------------
+// เตรียมค่าเริ่มต้น
+// -----------------------------
+$offset = 0;   // ← ป้องกัน undefined
+
+// -----------------------------
 // Export เฉพาะผลค้นหา / เฉพาะหน้า
 // -----------------------------
 if (isset($_GET['export']) && $_GET['export'] === 'excel') {
@@ -510,6 +515,9 @@ while ($row = $actRes->fetch_assoc()) {
       }
     });
   </script>
+
+  <?php include __DIR__ . '/components/footer.php'; ?>
+
 </body>
 
 </html>

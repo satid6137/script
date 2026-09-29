@@ -67,7 +67,7 @@ if (isset($_GET['action'], $_GET['id'])) {
 }
 
 // ดึงข้อมูล user + สถานะ 2FA
-$users = $conn->query("SELECT id, username, role, twofa_enabled FROM user WHERE active = 1 ORDER BY id");
+$users = $conn->query("SELECT id, username, fullname, role, twofa_enabled FROM user WHERE active = 1 ORDER BY id");
 ?>
 
 <!DOCTYPE html>
@@ -108,7 +108,7 @@ $users = $conn->query("SELECT id, username, role, twofa_enabled FROM user WHERE 
       <a href="register.php?from=admin" class="btn btn-success">➕ สร้าง Username</a>
       <a href="cron_profiles.php" class="btn btn-primary">⏱ ตั้งเวลา Cron</a>
       <a href="log.php" class="btn btn-outline-info">📜 ดู Log</a>
-      <a href="inactive_users.php" class="btn btn-outline-warning">🚫 ผู้ใช้ที่ถูกปิดการใช้งาน</a>
+      <a href="inactive_users.php" class="btn btn-outline-warning">🚫 ผู้ใช้ที่ถูกปิดการใช้งาน/ผู้ใช้ใหม่</a>
     </div>
 
     <div class="table-responsive hos-card p-0 mb-4">
@@ -117,30 +117,26 @@ $users = $conn->query("SELECT id, username, role, twofa_enabled FROM user WHERE 
           <tr>
             <th>ID</th>
             <th>Username</th>
-            <th>Role</th>
+            <th>ชื่อจริง</th>
+            <th>สิทธิ</th>
             <th>2FA</th>
-            <th>Actions</th>
+            <th>สถานะ</th>
           </tr>
         </thead>
         <tbody>
           <?php while ($u = $users->fetch_assoc()): ?>
             <tr>
-              <td>
-                <?= $u['id'] ?>
-              </td>
-              <td>
-                <?= htmlspecialchars($u['username']) ?>
-              </td>
-              <td>
-                <?= $u['role'] ?>
-              </td>
+              <td> <?= $u['id'] ?> </td>
+              <td> <?= htmlspecialchars($u['username']) ?> </td>
+              <td><?= htmlspecialchars($u['fullname'] ?? '-') ?></td>
+              <td> <?= $u['role'] ?> </td>
 
               <!-- แสดงสถานะ 2FA -->
               <td>
                 <?php if ($u['twofa_enabled'] == 1): ?>
                   <span class="badge bg-success">เปิดใช้งาน</span>
                 <?php else: ?>
-                  <span class="badge bg-secondary">ปิดอยู่</span>
+                  <span class="badge bg-secondary">ปิดใช้งาน</span>
                 <?php endif; ?>
               </td>
 
@@ -149,9 +145,9 @@ $users = $conn->query("SELECT id, username, role, twofa_enabled FROM user WHERE 
 
                   <!-- Promote / Demote -->
                   <?php if ($u['role'] === 'user'): ?>
-                    <a href="?action=promote&id=<?= $u['id'] ?>" class="btn btn-sm btn-outline-primary">💼 เป็น Admin</a>
+                    <a href="?action=promote&id=<?= $u['id'] ?>" class="btn btn-sm btn-outline-primary">💼 Admin</a>
                   <?php else: ?>
-                    <a href="?action=demote&id=<?= $u['id'] ?>" class="btn btn-sm btn-outline-warning">↩️ ยกเลิกสิทธิ์</a>
+                    <a href="?action=demote&id=<?= $u['id'] ?>" class="btn btn-sm btn-outline-warning">↩️ User</a>
                   <?php endif; ?>
 
                   <!-- Disable user -->
@@ -212,6 +208,9 @@ $users = $conn->query("SELECT id, username, role, twofa_enabled FROM user WHERE 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </div>
+
+  <?php include __DIR__ . '/components/footer.php'; ?>
+
 </body>
 
 </html>

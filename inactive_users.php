@@ -15,7 +15,7 @@ $users = $conn->query("SELECT id, username, role FROM user WHERE active = 0 ORDE
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ผู้ใช้ที่ถูกปิดการใช้งาน | <?= $hospital ?></title>
+    <title>ผู้ใช้ที่ถูกปิดการใช้งาน/ผู้ใช้ใหม่ | <?= $hospital ?></title>
     <link rel="icon" href="/script/assets/icons/health48.png" type="image/png">
     <link rel="apple-touch-icon" href="/script/assets/icons/health48.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,8 +39,8 @@ $users = $conn->query("SELECT id, username, role FROM user WHERE active = 0 ORDE
 
     <div class="container mt-4" style="max-width: 900px;">
         <div class="hos-page-header">
-            <h1 class="hos-page-title">ผู้ใช้ที่ถูกปิดการใช้งาน</h1>
-            <p class="hos-page-subtitle mb-0">รายชื่อผู้ใช้ที่ถูกระงับสิทธิ์การใช้งานระบบ</p>
+            <h1 class="hos-page-title">ผู้ใช้ที่ถูกปิดการใช้งาน/ผู้ใช้ใหม่</h1>
+            <p class="hos-page-subtitle mb-0">รายชื่อผู้ใช้ที่ถูกระงับสิทธิ์การใช้งานระบบ/ผู้ใช้ใหม่</p>
         </div>
 
         <div class="table-responsive hos-card p-0 mb-4">
@@ -78,6 +78,9 @@ $users = $conn->query("SELECT id, username, role FROM user WHERE active = 0 ORDE
 
         <a href="admin.php" class="btn btn-secondary mb-4">⬅️ กลับหน้า Admin</a>
     </div>
+
+    <?php include __DIR__ . '/components/footer.php'; ?>
+
 </body>
 
 </html>

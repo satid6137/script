@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
 require __DIR__ . '/config.php';
 require_once 'log_helper.php';
 require_once 'version_helper.php';
@@ -17,6 +18,10 @@ if (isset($_SESSION['user_id'])) {
   $stmt->close();
 }
 
+if (!$userRole) {
+  $userRole = 'user'; // หรือกำหนด role เริ่มต้นที่คุณต้องการ
+}
+
 // ✅ ดึงรายการ Query
 $result = $conn->query("
   SELECT 
@@ -27,7 +32,7 @@ $result = $conn->query("
       sq.last_post_at,
       u.username AS created_by_name,
       cp.label AS cron_label,
-
+      u.fullname as fullname,
       ns.notify_type,
       ns.line_token,
       ns.moph_client_key,
@@ -140,6 +145,22 @@ $buttonText = $version['hasUpdate']
 
 <body>
 
+  <?php if (!empty($_SESSION['provider_new_user'])): ?>
+    <div id="providerPopup" class="alert alert-info position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
+      style="z-index: 9999; max-width: 400px;">
+      <?= htmlspecialchars($_SESSION['provider_new_user']) ?>
+    </div>
+
+    <script>
+      setTimeout(() => {
+        const popup = document.getElementById('providerPopup');
+        if (popup) popup.style.display = 'none';
+      }, 3000);
+    </script>
+
+    <?php unset($_SESSION['provider_new_user']); ?>
+  <?php endif; ?>
+
   <header class="hos-topbar">
     <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
 
@@ -164,7 +185,7 @@ $buttonText = $version['hasUpdate']
           <span class="hos-user-chip">👤 <?= htmlspecialchars($username) ?> · <?= htmlspecialchars($userRole) ?></span>
           <a href="create.php" class="btn btn-sm btn-success">➕ เพิ่ม Query</a>
           <a href="change_password.php" class="btn btn-sm btn-outline-secondary">เปลี่ยนรหัสผ่าน</a>
-          <?php if ($userRole === 'admin'): ?>
+          <?php if (!empty($userRole) && $userRole === 'admin'): ?>
             <a href="admin.php" rel="noopener" class="btn btn-sm btn-outline-dark">Admin Panel</a>
             <a href="telemed_api_docs.php" rel="noopener" class="btn btn-sm btn-outline-info">Telemed API
               Docs</a>
@@ -228,7 +249,7 @@ $buttonText = $version['hasUpdate']
             $queryName = rawurlencode($queryNameRaw);
             $hisType = htmlspecialchars($row['his_type']);
             $queryText = htmlspecialchars(substr($row['query_text'], 0, 40));
-            $createdBy = htmlspecialchars($row['created_by_name'] ?? '—');
+            $createdBy = htmlspecialchars($row['fullname'] ?? '—');
             $rowId = $row['id'];
             $lastPost = $row['last_post_at'] ?? null;
             $urlPost = "{$ipServer}/query/{$queryName}/{$hosCode}";
@@ -320,8 +341,8 @@ $buttonText = $version['hasUpdate']
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"
@@ -845,10 +866,7 @@ $buttonText = $version['hasUpdate']
       });
     </script>
 
-    <footer class="hos-footer text-center">
-      Developed by <strong>นายสาธิต รินคำ</strong> นักวิชาการคอมพิวเตอร์ กลุ่มงานสุขภาพดิจิตอล โรงพยาบาลห้างฉัตร
-      · Coder Copilot · เครดิต YuiCity / Vorabodin สสจ.ชม · <?= date('Y') ?>
-    </footer>
+    <?php include __DIR__ . '/components/footer.php'; ?>
 
   </div> <!-- .container -->
 </body>

@@ -231,6 +231,8 @@ $logs = $conn->query("
         </ul>
     </nav>
 
+    <?php include __DIR__ . '/components/footer.php'; ?>
+
 </body>
 
 </html>

@@ -212,6 +212,8 @@ function checkVersion($name, $current, $last)
         <?= date('Y') ?>
     </footer>
 
+    <?php include __DIR__ . '/components/footer.php'; ?>
+
 </body>
 
 </html>

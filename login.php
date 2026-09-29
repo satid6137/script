@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($stmt->fetch()) {
     $stmt->close();
 
-    if (password_verify($pass, $hashed)) {
+    if (!empty($hashed) && password_verify($pass, $hashed)) {
 
       // ⭐ ถ้าเปิด 2FA → ไปหน้า verify_2fa.php
       if ($twofa == 1) {
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="w-100" style="max-width: 420px;">
 
       <div class="text-center mb-4">
-        <img src="/script/assets/icons/health48.png" alt="โลโก้โรงพยาบาลห้างฉัตร" width="56" height="56" class="mb-2">
+        <img src="/script/assets/icons/logo-MOPH.png" alt="โลโก้โรงพยาบาล" width="150" height="150" class="mb-2">
         <div class="hos-brand justify-content-center">
           <?= $hospital ?>
         </div>
@@ -87,6 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <button class="btn btn-primary w-100 mb-3" type="submit">เข้าสู่ระบบ</button>
           <a href="index.php" class="btn btn-outline-secondary w-100 mt-2">⬅️ หน้าหลัก</a>
         </form>
+
+        <a href="provider_auth.php" class="btn btn-success w-100 mt-2">
+          🔑 เข้าสู่ระบบด้วย Provider ID
+        </a>
+
       </div>
 
       <p class="text-center hos-page-subtitle mt-3 mb-0">

@@ -97,4 +97,6 @@ $result = $conn->query($sql);
     </div>
 </body>
 
+<?php include __DIR__ . '/components/footer.php'; ?>
+
 </html>
