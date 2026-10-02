@@ -96,16 +96,14 @@ $buttonText = $version['hasUpdate']
       white-space: pre-wrap;
       word-break: break-word;
     }
-  </style>
-  <style>
+
     .query-name-wrap {
       white-space: normal !important;
       word-break: break-word;
       max-width: 300px;
       /* ปรับได้ */
     }
-  </style>
-  <style>
+
     .action-buttons {
       white-space: nowrap;
     }
@@ -114,8 +112,7 @@ $buttonText = $version['hasUpdate']
       display: inline-block;
       margin-right: 4px;
     }
-  </style>
-  <style>
+
     .btn-pink {
       background-color: #ff4fa3;
       color: white;
@@ -145,26 +142,11 @@ $buttonText = $version['hasUpdate']
 
 <body>
 
-  <?php if (!empty($_SESSION['provider_new_user'])): ?>
-    <div id="providerPopup" class="alert alert-info position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
-      style="z-index: 9999; max-width: 400px;">
-      <?= htmlspecialchars($_SESSION['provider_new_user']) ?>
-    </div>
-
-    <script>
-      setTimeout(() => {
-        const popup = document.getElementById('providerPopup');
-        if (popup) popup.style.display = 'none';
-      }, 3000);
-    </script>
-
-    <?php unset($_SESSION['provider_new_user']); ?>
-  <?php endif; ?>
-
   <header class="hos-topbar">
-    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="container d-flex justify-content-between align-items-center">
 
-      <div class="d-flex align-items-center gap-2">
+      <!-- ฝั่งซ้าย -->
+      <div class="d-flex align-items-center gap-2 flex-wrap">
         <a href="index.php" class="hos-brand">
           <img src="/script/assets/icons/health48.png" alt="โลโก้โรงพยาบาลห้างฉัตร">
           <span>
@@ -177,24 +159,28 @@ $buttonText = $version['hasUpdate']
             🔄 <?= $buttonText ?>
           </a>
         <?php endif; ?>
-
       </div>
 
-      <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- ฝั่งขวา -->
+      <div class="d-flex align-items-center gap-2 flex-wrap">
         <?php if (isset($_SESSION['user_id'])): ?>
           <span class="hos-user-chip">👤 <?= htmlspecialchars($username) ?> · <?= htmlspecialchars($userRole) ?></span>
           <a href="create.php" class="btn btn-sm btn-success">➕ เพิ่ม Query</a>
           <a href="change_password.php" class="btn btn-sm btn-outline-secondary">เปลี่ยนรหัสผ่าน</a>
+
           <?php if (!empty($userRole) && $userRole === 'admin'): ?>
-            <a href="admin.php" rel="noopener" class="btn btn-sm btn-outline-dark">Admin Panel</a>
-            <a href="telemed_api_docs.php" rel="noopener" class="btn btn-sm btn-outline-info">Telemed API
-              Docs</a>
+            <a href="admin.php" class="btn btn-sm btn-outline-dark">Admin Panel</a>
+            <a href="telemed_api_docs.php" class="btn btn-sm btn-outline-info">Telemed API Docs</a>
           <?php endif; ?>
+
           <a href="logout.php" class="btn btn-sm btn-outline-danger">ออกจากระบบ</a>
+
         <?php else: ?>
-          <a href="login.php" class="btn btn-sm btn-outline-primary">เข้าสู่ระบบ</a>
+          <a href="provider_auth.php" class="btn btn-sm btn-outline-primary">🔑 เข้าสู่ระบบด้วย Provider ID</a>
+          <a href="login.php" class="btn btn-sm btn-outline-primary">👤 เข้าสู่ระบบด้วย Username</a>
         <?php endif; ?>
       </div>
+
     </div>
   </header>
 
@@ -341,8 +327,8 @@ $buttonText = $version['hasUpdate']
                     ?>
 
                     <code class="text-wrap d-inline-block" style="max-width: 350px;">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= $pingUrl ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <?= $pingUrl ?>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </code>
 
                     <!-- ปุ่มคัดลอก -->
                     <button class="btn btn-sm btn-outline-secondary p-0 px-1 ms-1" title="คัดลอก URL"
@@ -474,6 +460,18 @@ $buttonText = $version['hasUpdate']
       <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert">
         <div class="d-flex">
           <div class="toast-body" id="toastBody">✅ สำเร็จ!</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast แจ้งผล login ไม่ใช่หน่วยงาน -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="providerErrorToast" class="toast text-bg-danger border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <?= $_SESSION['provider_error'] ?? '' ?>
+          </div>
           <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
       </div>
@@ -869,6 +867,41 @@ $buttonText = $version['hasUpdate']
     <?php include __DIR__ . '/components/footer.php'; ?>
 
   </div> <!-- .container -->
+
+  <?php if (!empty($_SESSION['provider_error'])): ?>
+    <script>
+      const toastEl = document.getElementById('providerErrorToast');
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+    </script>
+    <?php unset($_SESSION['provider_error']); ?>
+  <?php endif; ?>
+
+  <?php if (!empty($_SESSION['provider_new_user'])): ?>
+
+    <!-- สร้างบัญชีใหม่แล้ว กรุณาให้ Admin เปิดการใช้งาน -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+      <div id="providerToast" class="toast align-items-center text-bg-info border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <?= htmlspecialchars($_SESSION['provider_new_user']) ?>
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toastEl = document.getElementById('providerToast');
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+      });
+    </script>
+
+    <?php unset($_SESSION['provider_new_user']); ?>
+  <?php endif; ?>
+
 </body>
 
 </html>

@@ -85,7 +85,9 @@ $hcode = $profile['organization'][0]['hcode'] ?? null;
 
 /* Check HOS_CODE */
 if ($hcode !== $_ENV['HOS_CODE']) {
-    die("หน่วยงานไม่ตรงกับที่กำหนด");
+    $_SESSION['provider_error'] = "❌ คุณไม่ใช่บุคลากรในหน่วยงาน<?= $hospital ?>";
+    header("Location: index.php");
+    exit;
 }
 
 /* Check user */
